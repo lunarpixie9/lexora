@@ -15,7 +15,7 @@ clinician-labeled child samples — see README.md, section "The labeling gap".
 from __future__ import annotations
 from pathlib import Path
 import pandas as pd
-from phonetic_rules import analyze_error
+from src.phonetic_rules import analyze_error
 
 PROCESSED_DIR = Path(__file__).resolve().parent.parent / "data" / "processed"
 INPUT_CSV = PROCESSED_DIR / "spelling_errors_clean.csv"
