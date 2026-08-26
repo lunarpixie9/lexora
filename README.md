@@ -59,8 +59,7 @@ python -m venv venv
 source venv/bin/activate
 
 # Install dependencies
-pip install fastapi uvicorn sqlalchemy pyspellchecker passlib bcrypt python-multipart
-
+pip install -r requirements.txt
 # Start the server (runs on http://127.0.0.1:8000)
 uvicorn main:app --reload
 ```
