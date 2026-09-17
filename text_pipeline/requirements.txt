@@ -1,4 +1,7 @@
+Metaphone==0.6
+numpy==2.5.2
+pandas==3.0.5
 pyspellchecker==0.8.1
-pandas
-rapidfuzz
-metaphone
+python-dateutil==2.9.0.post0
+RapidFuzz==3.14.5
+six==1.17.0
