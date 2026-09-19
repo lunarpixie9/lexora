@@ -1,0 +1,32 @@
+# Datasets: raw downloads and processed copies are never committed.
+# Only data/README.md, data/metadata/, and small documented samples are tracked.
+data/raw/
+data/processed/
+data/**/*.zip
+data/**/*.mp3
+data/**/*.wav
+data/**/*.dat
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Secrets / local config
+.env
+.env.*
+!.env.example
+~/.kaggle/
+kaggle.json
+
+# OS / editor
+desktop.ini
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
