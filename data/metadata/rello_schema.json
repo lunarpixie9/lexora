@@ -1,0 +1,188 @@
+{
+ "dataset": "luzrello/dyslexia",
+ "files": [
+  {
+   "file": "Dyt-desktop.csv",
+   "bytes": 2034159,
+   "delimiter": ";",
+   "line_ending": "CRLF",
+   "encoding": "ASCII/UTF-8 (no BOM)",
+   "columns": 197,
+   "rows": 3644,
+   "ragged_rows": 0,
+   "column_order": "Gender, Nativelang, Otherlang, Age, then {Clicks,Hits,Misses,Score,Accuracy,Missrate}{1..32}, then Dyslexia",
+   "demographic_columns": {
+    "Gender": {
+     "Male": 1851,
+     "Female": 1793
+    },
+    "Nativelang": {
+     "No": 2674,
+     "Yes": 970
+    },
+    "Otherlang": {
+     "Yes": 2955,
+     "No": 689
+    },
+    "Age": {
+     "7": 363,
+     "13": 296,
+     "8": 548,
+     "9": 558,
+     "16": 78,
+     "17": 47,
+     "11": 509,
+     "14": 222,
+     "10": 561,
+     "12": 294,
+     "15": 168
+    }
+   },
+   "label_column": "Dyslexia",
+   "label_values": {
+    "No": 3252,
+    "Yes": 392
+   },
+   "label_positive_rate": 0.1076,
+   "performance_columns": 192,
+   "questions": 32,
+   "family_value_ranges": {
+    "Clicks": [
+     0.0,
+     430.0
+    ],
+    "Hits": [
+     0.0,
+     73.0
+    ],
+    "Misses": [
+     0.0,
+     167.0
+    ],
+    "Score": [
+     0.0,
+     73.0
+    ],
+    "Accuracy": [
+     0.0,
+     875.0
+    ],
+    "Missrate": [
+     0.0,
+     975.0
+    ]
+   },
+   "null_token": "NULL",
+   "cells_null": 0,
+   "rows_with_any_null": 0,
+   "null_cells_by_question": {},
+   "rows_with_null_by_age": {}
+  },
+  {
+   "file": "Dyt-tablet.csv",
+   "bytes": 992412,
+   "delimiter": ";",
+   "line_ending": "CRLF",
+   "encoding": "ASCII/UTF-8 (no BOM)",
+   "columns": 197,
+   "rows": 1395,
+   "ragged_rows": 0,
+   "column_order": "Gender, Nativelang, Otherlang, Age, then {Clicks,Hits,Misses,Score,Accuracy,Missrate}{1..32}, then Dyslexia",
+   "demographic_columns": {
+    "Gender": {
+     "Male": 695,
+     "Female": 700
+    },
+    "Nativelang": {
+     "Yes": 1344,
+     "No": 51
+    },
+    "Otherlang": {
+     "No": 1278,
+     "Yes": 117
+    },
+    "Age": {
+     "7": 149,
+     "8": 179,
+     "9": 178,
+     "10": 201,
+     "11": 189,
+     "12": 169,
+     "13": 145,
+     "14": 67,
+     "15": 80,
+     "16": 33,
+     "17": 5
+    }
+   },
+   "label_column": "Dyslexia",
+   "label_values": {
+    "No": 1247,
+    "Yes": 148
+   },
+   "label_positive_rate": 0.1061,
+   "performance_columns": 192,
+   "questions": 32,
+   "family_value_ranges": {
+    "Clicks": [
+     0.0,
+     378.0
+    ],
+    "Hits": [
+     0.0,
+     47.0
+    ],
+    "Misses": [
+     0.0,
+     133.0
+    ],
+    "Score": [
+     0.0,
+     378.0
+    ],
+    "Accuracy": [
+     0.0,
+     875.0
+    ],
+    "Missrate": [
+     0.0,
+     875.0
+    ]
+   },
+   "null_token": "NULL",
+   "cells_null": 45650,
+   "rows_with_any_null": 1395,
+   "null_cells_by_question": {
+    "13": 1962,
+    "18": 1962,
+    "19": 1962,
+    "20": 1970,
+    "21": 5376,
+    "22": 8,
+    "23": 8,
+    "24": 1970,
+    "25": 5376,
+    "26": 1970,
+    "27": 1970,
+    "28": 1974,
+    "29": 8370,
+    "30": 12,
+    "31": 5380,
+    "32": 5380
+   },
+   "rows_with_null_by_age": {
+    "7": 149,
+    "8": 179,
+    "9": 178,
+    "10": 201,
+    "11": 189,
+    "12": 169,
+    "13": 145,
+    "14": 67,
+    "15": 80,
+    "16": 33,
+    "17": 5
+   }
+  }
+ ]
+}

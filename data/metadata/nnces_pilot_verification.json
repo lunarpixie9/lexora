@@ -1,0 +1,37 @@
+{
+ "selected_files": 500,
+ "present": 500,
+ "missing": [],
+ "unexpected_files_in_raw": [],
+ "size_mismatches": [],
+ "header_errors": [],
+ "truncated_data_chunks": [],
+ "bytes_on_disk": 645682672,
+ "wav_params_counts (rate, channels, bits, format)": {
+  "(44100, 2, 16, 'PCM')": 500
+ },
+ "riff_size_field_minus_actual (bytes)": {
+  "-4": 500
+ },
+ "note": "RIFF size field is written 4 bytes short by the recorder; data chunk is complete. Python wave drops the last frame; ffmpeg/soundfile are unaffected.",
+ "stereo_files_with_identical_channels": 500,
+ "stereo_files_with_differing_channels": 0,
+ "duration_s": {
+  "min": 2.88,
+  "median": 6.13,
+  "max": 39.47,
+  "total_hours": 1.017
+ },
+ "peak_abs_sample": {
+  "min": 8531,
+  "median": 17651,
+  "max": 32767
+ },
+ "clipped_files (peak>=32767)": 12,
+ "rms_ch0": {
+  "min": 1135.9,
+  "median": 2292.8,
+  "max": 4681.7
+ },
+ "near_silent_files (rms<50)": 0
+}
