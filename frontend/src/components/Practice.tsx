@@ -5,7 +5,7 @@ import { api, ApiError } from '../lib/api'
 import { PATTERN_LABEL, SKILL_LABEL, fmtDate, pct, speak } from '../lib/format'
 import type { Activity, AttemptResult } from '../lib/types'
 import { RecorderControl, useRecorder } from './Recorder'
-import { EmptyState, ErrorBox, Spinner } from './ui'
+import { EmptyState, ErrorBox, ListeningStatus, Spinner } from './ui'
 import type { ReadCheck } from '../lib/types'
 
 export const KIND_META: Record<Activity['kind'], { label: string; icon: ReactNode; tint: string }> = {
@@ -213,7 +213,7 @@ function ReadAloudItem({ index, sentence, activityId, done, onDone }: { index: n
       </div>
       {showRec && (
         <div className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-xl bg-cream-100 p-3">
-          {checking ? <span className="flex items-center gap-2 text-sm font-bold text-navy-500"><Loader2 className="h-4 w-4 animate-spin" />Listening…</span> : (
+          {checking ? <ListeningStatus /> : (
             <>
               <RecorderControl rec={rec} />
               {rec.result && <button className="btn-primary" onClick={check}>Check my reading</button>}

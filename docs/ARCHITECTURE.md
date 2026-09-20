@@ -20,7 +20,7 @@ Governing requirements: `PROJECT_SPEC.md`. Dataset provenance: `DATASET_RESEARCH
 │ normalize    │ audio (ffmpeg)      │ aser_features (shared train/runtime)│
 │ alignment    │ transcribe (Whisper)│ reading_level (XGBoost + TreeSHAP) │
 │ phonetic     │ features (fluency)  │ indicator (additive composite)     │
-│ features     │                     │ train_reading_level · validate_rello│
+│ features     │ pronunciation (w2v2)│ train_reading_level · validate_rello│
 └──────────────┴─────────────────────┴────────────────────────────────────┘
                  SQLite (default) or MySQL · local file storage
 ```
@@ -135,7 +135,8 @@ PBKDF2-SHA256 password hashes, HS256 JWTs (startup warning if the built-in dev k
 
 * No dataset provides dyslexia labels for Indian children's English; the indicator's weights are a design choice, the model estimates *reading level*, and no clinical validity is claimed or established.
 * ASER audio is phone-quality AMR-WB; Whisper is unreliable on isolated letters (recall 0.33 on capitals), so letter items rely on examiner marking. On passages Whisper both mishears accented speech and auto-corrects mispronunciations; the pronunciation layer counters the second problem but is itself noisy on phone-quality children's audio (see the phoneme_layer figures in the validation JSON), and dictionary pronunciations are American English, so its flags are advisory and the teacher can still correct the transcript.
-* The pronunciation model needs ~1.2 GB of downloaded weights and ~1.5 GB RAM in addition to Whisper; on small machines set `PRONUNCIATION_MODEL=` and the feature is skipped.
+* The pronunciation model needs ~1.2 GB of downloaded weights and ~1 GB RAM (int8, in-place quantised) in addition to Whisper — the backend measures ≈2.6 GB with both models loaded; on small machines set `PRONUNCIATION_MODEL=` and the feature is skipped. Models preload in a background thread at startup (`PRELOAD_MODELS`).
+* Phoneme flags on isolated letters are the layer's weakest case (70% agreement), so the report shows sound flags only for words and sentences; the validated "either recogniser passes" rescue still applies to letters.
 * NNCES contains audio only; it supports prompt-free measures and nothing else. Prompts were deliberately not reconstructed.
 * Rello results do not transfer across test versions, underlining that such classifiers are instrument-specific.
 * The demo child's history is generated through the real pipeline from scripted responses; it is labelled and is not evidence.

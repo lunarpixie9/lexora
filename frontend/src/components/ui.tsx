@@ -1,5 +1,5 @@
 import { AlertCircle, Info, Loader2 } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { BAND_CLASS, BAND_SHORT } from '../lib/format'
 
 export function Spinner({ label = 'Loading…' }: { label?: string }) {
@@ -99,6 +99,19 @@ export function ProgressBar({ value, color = 'bg-teal-500', className = '' }: { 
   return (
     <div className={`h-2 w-full overflow-hidden rounded-full bg-cream-200 ${className}`} aria-hidden>
       <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.max(0, Math.min(100, value * 100))}%` }} />
+    </div>
+  )
+}
+
+/** Shown while audio is being analysed; explains a long wait (the first recording loads the speech models). */
+export function ListeningStatus({ label = 'Listening…' }: { label?: string }) {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => { const t = window.setTimeout(() => setSlow(true), 8000); return () => window.clearTimeout(t) }, [])
+  return (
+    <div className="flex flex-col items-center gap-2 py-4 text-navy-500" aria-live="polite">
+      <Loader2 className="h-8 w-8 animate-spin text-teal-500" aria-hidden />
+      <span className="text-sm font-bold">{label}</span>
+      {slow && <span className="max-w-xs text-center text-xs">Still working — the first recording also loads the speech models, which can take a minute.</span>}
     </div>
   )
 }
