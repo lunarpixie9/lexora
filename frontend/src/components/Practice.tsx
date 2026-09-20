@@ -1,10 +1,12 @@
-import { BookOpenText, CheckCircle2, ListChecks, Loader2, PenLine, Sparkles, Star, Volume2 } from 'lucide-react'
+import { BookOpenText, CheckCircle2, ListChecks, Loader2, Mic, PenLine, Sparkles, Star, Volume2 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, ApiError } from '../lib/api'
 import { PATTERN_LABEL, SKILL_LABEL, fmtDate, pct, speak } from '../lib/format'
 import type { Activity, AttemptResult } from '../lib/types'
+import { RecorderControl, useRecorder } from './Recorder'
 import { EmptyState, ErrorBox, Spinner } from './ui'
+import type { ReadCheck } from '../lib/types'
 
 export const KIND_META: Record<Activity['kind'], { label: string; icon: ReactNode; tint: string }> = {
   word_practice: { label: 'Spot the word', icon: <ListChecks className="h-5 w-5" />, tint: 'bg-teal-100 text-teal-700' },
@@ -148,13 +150,8 @@ export function PracticePlayer({ activity, backHref }: { activity: Activity; bac
           </div>
         ))}
         {c.kind === 'reading' && c.reading.map((it, i) => (
-          <div key={i} className="card flex flex-wrap items-center justify-between gap-3 p-4">
-            <p className="font-display text-2xl font-bold">{it.sentence}</p>
-            <div className="flex gap-2">
-              <button className="btn-ghost" onClick={() => speak(it.sentence)} aria-label="Hear this sentence"><Volume2 className="h-4 w-4" /></button>
-              <button onClick={() => set(i, !answers[String(i)])} className={answers[String(i)] ? 'btn-teal' : 'btn-secondary'}><CheckCircle2 className="h-4 w-4" />{answers[String(i)] ? 'Read it!' : 'I read it'}</button>
-            </div>
-          </div>
+          <ReadAloudItem key={i} index={i} sentence={it.sentence} activityId={activity.id}
+            done={!!answers[String(i)]} onDone={(v) => set(i, v)} />
         ))}
         {c.kind === 'story' && (
           <>
@@ -179,6 +176,57 @@ export function PracticePlayer({ activity, backHref }: { activity: Activity; bac
         <Link to={backHref} className="btn-ghost">Back</Link>
         <button className="btn-primary btn-lg" onClick={submit} disabled={busy || answered < total}>{busy ? 'Saving…' : answered < total ? `${total - answered} left` : 'Check my answers'}</button>
       </div>
+    </div>
+  )
+}
+
+
+/** One read-aloud sentence: mark as read, or record it for instant pronunciation feedback. */
+function ReadAloudItem({ index, sentence, activityId, done, onDone }: { index: number; sentence: string; activityId: number; done: boolean; onDone: (v: boolean) => void }) {
+  const rec = useRecorder()
+  const [result, setResult] = useState<ReadCheck | null>(null)
+  const [checking, setChecking] = useState(false)
+  const [showRec, setShowRec] = useState(false)
+
+  const check = async () => {
+    if (!rec.result) return
+    setChecking(true)
+    try {
+      const r = await api.readCheck(activityId, index, rec.result.blob, rec.result.filename)
+      setResult(r)
+      onDone(true)
+      rec.reset()
+    } catch (e) {
+      setResult({ sentence, engine: 'error', transcript: '', accuracy: 0, flagged_words: [], pronunciation: null, message: e instanceof ApiError ? e.message : 'Could not check the recording' })
+    } finally { setChecking(false) }
+  }
+
+  return (
+    <div className="card p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="font-display text-2xl font-bold">{sentence}</p>
+        <div className="flex gap-2">
+          <button className="btn-ghost" onClick={() => speak(sentence)} aria-label="Hear this sentence"><Volume2 className="h-4 w-4" /></button>
+          {rec.supported && <button className={showRec ? 'btn-teal' : 'btn-secondary'} onClick={() => setShowRec(!showRec)}><Mic className="h-4 w-4" />Read it to me</button>}
+          <button onClick={() => onDone(!done)} className={done ? 'btn-teal' : 'btn-secondary'}><CheckCircle2 className="h-4 w-4" />{done ? 'Read it!' : 'I read it'}</button>
+        </div>
+      </div>
+      {showRec && (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-xl bg-cream-100 p-3">
+          {checking ? <span className="flex items-center gap-2 text-sm font-bold text-navy-500"><Loader2 className="h-4 w-4 animate-spin" />Listening…</span> : (
+            <>
+              <RecorderControl rec={rec} />
+              {rec.result && <button className="btn-primary" onClick={check}>Check my reading</button>}
+            </>
+          )}
+        </div>
+      )}
+      {result && (
+        <div className={`mt-3 rounded-xl px-3 py-2 text-sm ${result.flagged_words.length || result.engine === 'error' ? 'bg-sun-100' : 'bg-teal-100/60'}`} aria-live="polite">
+          <p className="font-bold">{result.message}</p>
+          {result.transcript && <p className="text-xs text-navy-500">Heard: “{result.transcript}”{result.engine === 'demo' && ' (demo transcriber)'}</p>}
+        </div>
+      )}
     </div>
   )
 }

@@ -56,3 +56,12 @@ def test_indicator_is_additive_and_banded():
     assert abs(sum(s["weight"] for s in ind["signals"]) - 1) < 1e-6
     assert "speech" not in ind["groups_present"]
     assert compute_indicator(None, None, None)["band"] == "insufficient_data"
+
+
+def test_practice_generator_survives_one_letter_missed_words():
+    from app.services.practice import DeterministicGenerator
+
+    acts = DeterministicGenerator().generate({"age": 7, "class_grade": 2},
+                                             {"target_skills": ["clear_sounds"], "words_missed": ["i", "a", "is"], "patterns": {}}, seed=1)
+    word_choice = next(a for a in acts if a.kind == "word_practice")
+    assert word_choice.word_choice and all(len(i.options) >= 2 for i in word_choice.word_choice)

@@ -58,6 +58,7 @@ def _reading_items(session: ScreeningSession) -> list[dict]:
             "seconds": r.duration_seconds or sr.get("duration_seconds"),
             "engine": sr.get("engine"),
             "transcript": sr.get("transcript"),
+            "pronunciation_flagged": bool((sr.get("pronunciation") or {}).get("flagged_words")) if (sr.get("pronunciation") or {}).get("scored") else None,
         })
     return items
 
@@ -93,6 +94,7 @@ def _speech_summary(session: ScreeningSession, class_grade: int) -> dict:
     for t in session.tasks:
         if t.kind == "speech" and t.response and t.response.speech_result:
             f = dict(t.response.speech_result.features)
+            f["task_id"] = t.id
             f["prompt"] = t.prompt_text
             f["wpm_reference"] = wpm_reference(class_grade)["median_wpm"]
             return f
@@ -111,7 +113,12 @@ def _error_profile(reading_items, writing, speech) -> dict:
     for w in (speech.get("word_errors") or []):
         if w.get("expected") and w.get("actual") is not None:
             profile["words_missed"].append(w["expected"])
+    pron = speech.get("pronunciation") or {}
+    profile["mispronounced"] = sorted({w for w in (pron.get("flagged_words") or []) if len(w) >= 3})
+    profile["words_missed"] += profile["mispronounced"]
     skills = []
+    if len(profile["mispronounced"]) >= 2:
+        skills.append("clear_sounds")
     if profile["letters_missed"]:
         skills.append("letter_recognition")
     if profile["patterns"].get("mirror_letter_reversal") or profile["patterns"].get("sequence_reversal") \

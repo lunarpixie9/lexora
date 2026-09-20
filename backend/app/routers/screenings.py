@@ -9,11 +9,12 @@ from ..auth import get_current_user, require_roles
 from ..content import build_tasks
 from ..database import get_db
 from ..models import ScreeningResponse, ScreeningSession, ScreeningTask, User
-from ..schemas import ExaminerMarkIn, ReportOut, SessionOut, TaskOut, TextResponseIn
+from ..schemas import ExaminerMarkIn, ReportOut, SessionOut, TaskOut, TextResponseIn, TranscriptCorrectionIn
 from ..services.access import get_child_or_403
 from ..services.analysis import (
     analyse_audio_file,
     analyse_examiner_mark,
+    apply_transcript_correction,
     store_speech_result,
     analyse_text_response,
     apply_ladder_rule,
@@ -201,6 +202,26 @@ def examiner_mark(session_id: int, task_id: int, data: ExaminerMarkIn,
         score_session(db, s)
     else:
         apply_ladder_rule(s)
+    db.commit()
+    db.refresh(s)
+    return _session_out(s)
+
+
+@router.post("/{session_id}/tasks/{task_id}/transcript", response_model=SessionOut)
+def correct_transcript(session_id: int, task_id: int, data: TranscriptCorrectionIn,
+                       user: User = Depends(require_roles("teacher")), db: Session = Depends(get_db)):
+    """Teacher overrides Whisper's transcript with what the child actually said
+    (Whisper both mishears accented speech and silently 'repairs' mispronunciations).
+    Text-derived features are recomputed; a completed session is re-scored."""
+    s = _get_session(db, user, session_id)
+    t = next((t for t in s.tasks if t.id == task_id), None)
+    if t is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found in this screening")
+    if t.kind not in ("speech", "reading") or t.response is None or t.response.speech_result is None:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "This item has no transcript to correct")
+    apply_transcript_correction(db, t.response, data.transcript.strip())
+    if s.status == "completed":
+        score_session(db, s)
     db.commit()
     db.refresh(s)
     return _session_out(s)

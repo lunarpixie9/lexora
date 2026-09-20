@@ -26,13 +26,17 @@ def health(db: Session = Depends(get_db)):
         db_ok = True
     except Exception:
         db_ok = False
+    from lexora_speech import pronunciation as pron_mod
     from lexora_speech.transcribe import _transcriber, _tried
 
+    pron = ("loaded" if pron_mod._recognizer else ("unavailable" if pron_mod._tried else
+            ("configured (loads on first recording)" if settings.pronunciation_model else "disabled")))
     whisper = "loaded" if _transcriber else ("unavailable" if _tried else ("configured (loads on first use)" if settings.whisper_model else "disabled"))
     return {
         "status": "ok" if db_ok else "degraded",
         "database": {"ok": db_ok, "backend": settings.resolved_database_url.split(":")[0]},
         "whisper": {"state": whisper, "model": settings.whisper_model or None},
+        "pronunciation": {"state": pron, "model": settings.pronunciation_model or None},
         "reading_level_model": "loaded" if (ARTIFACTS / "reading_level_model.json").exists() else "missing (rule-based fallback)",
         "practice_generator": "gemini + deterministic fallback" if settings.gemini_api_key else "deterministic (no API key)",
         "demo_seeded": settings.seed_demo,

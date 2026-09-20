@@ -8,6 +8,7 @@ _tmp = tempfile.mkdtemp()
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
 os.environ["STORAGE_DIR"] = _tmp
 os.environ["WHISPER_MODEL"] = ""  # force the demo transcriber so tests stay fast
+os.environ["PRONUNCIATION_MODEL"] = ""  # never download the phoneme model in tests
 os.environ["SEED_DEMO"] = "true"
 
 from fastapi.testclient import TestClient  # noqa: E402
@@ -151,3 +152,24 @@ def test_discard_in_progress_screening(client, teacher):
     assert client.get(f"/api/screenings/{s['id']}", headers=teacher).status_code == 404
     completed = [x for x in client.get(f"/api/children/{kids[0]['id']}/sessions", headers=teacher).json() if x["status"] == "completed"]
     assert client.delete(f"/api/screenings/{completed[0]['id']}", headers=teacher).status_code == 409
+
+
+def test_teacher_can_correct_speech_transcript(client, teacher):
+    kids = client.get("/api/children", headers=teacher).json()
+    s = client.post("/api/screenings", json={"child_id": kids[1]["id"]}, headers=teacher).json()
+    s = client.post(f"/api/screenings/{s['id']}/demo-fill", headers=teacher).json()
+    client.post(f"/api/screenings/{s['id']}/complete", headers=teacher)
+    speech = next(t for t in s["tasks"] if t["kind"] == "speech")
+    before = client.get(f"/api/screenings/{s['id']}/report", headers=teacher).json()["speech"]
+    # teacher writes down what the child actually said: only the first word of the passage
+    r = client.post(f"/api/screenings/{s['id']}/tasks/{speech['id']}/transcript",
+                    json={"transcript": speech["prompt_text"].split()[0]}, headers=teacher)
+    assert r.status_code == 200
+    after = client.get(f"/api/screenings/{s['id']}/report", headers=teacher).json()["speech"]
+    assert after["engine"].endswith("(teacher-corrected)")
+    assert after["whisper_transcript"] == before["transcript"]  # original kept for audit
+    assert after["word_error_rate"] > before["word_error_rate"]
+    assert after["duration_seconds"] == before["duration_seconds"]  # audio-derived values untouched
+    # a task with no transcript cannot be corrected
+    writing = next(t for t in s["tasks"] if t["kind"] == "writing")
+    assert client.post(f"/api/screenings/{s['id']}/tasks/{writing['id']}/transcript", json={"transcript": "x"}, headers=teacher).status_code == 400

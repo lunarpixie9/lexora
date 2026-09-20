@@ -136,7 +136,7 @@ export interface Report {
     accuracy_SL?: number | null
     accuracy_W?: number | null
     accuracy_S?: number | null
-    items?: { task_id?: number; level: string; prompt: string; correct: boolean | null; seconds: number | null; engine: string | null; transcript: string | null }[]
+    items?: { task_id?: number; level: string; prompt: string; correct: boolean | null; seconds: number | null; engine: string | null; transcript: string | null; pronunciation_flagged?: boolean | null }[]
   }
   writing: {
     total_words?: number
@@ -147,8 +147,11 @@ export interface Report {
     items?: { prompt: string; answer: string; accuracy: number; word_errors: WordError[] }[]
   }
   speech: {
+    task_id?: number
     engine?: string
     transcript?: string
+    whisper_transcript?: string
+    words?: { text: string; start: number; end: number; confidence: number }[]
     prompt?: string
     duration_seconds?: number
     expected_words?: number
@@ -159,6 +162,17 @@ export interface Report {
     long_pauses?: number
     long_pauses_per_10_words?: number
     word_errors?: WordError[]
+    pronunciation?: {
+      available: boolean
+      scored: boolean
+      engine?: string
+      phoneme_error_rate?: number
+      words?: { word: string; expected: string; heard: string; error: number; flagged: boolean }[]
+      flagged_words?: string[]
+      unknown_words?: string[]
+      heard_ipa?: string
+      accent_tolerant?: boolean
+    }
   }
   error_profile: {
     patterns: Record<string, number>
@@ -240,4 +254,14 @@ export interface Health {
   reading_level_model: string
   practice_generator: string
   demo_seeded: boolean
+}
+
+export interface ReadCheck {
+  sentence: string
+  engine: string
+  transcript: string
+  accuracy: number
+  flagged_words: string[]
+  message: string
+  pronunciation: { scored: boolean; phoneme_error_rate?: number; flagged_words?: string[] } | null
 }

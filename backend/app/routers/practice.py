@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -8,7 +11,9 @@ from ..database import get_db
 from ..models import PracticeActivity, PracticeAttempt, ProgressRecord, ScreeningSession, User
 from ..schemas import AttemptIn, AttemptOut, PracticeOut
 from ..services.access import get_child_or_403
+from ..services.analysis import analyse_audio_file
 from ..services.practice import SKILL_LABELS, generate_activities, score_attempt
+from ..services.storage import get_storage
 
 router = APIRouter(prefix="/api/practice", tags=["practice"])
 
@@ -95,3 +100,51 @@ def submit_attempt(activity_id: int, data: AttemptIn, user: User = Depends(get_c
     db.refresh(attempt)
     return AttemptOut(id=attempt.id, activity_id=a.id, score=result["score"], correct=result["correct"],
                       total=result["total"], feedback=result["feedback"], completed_at=attempt.completed_at)
+
+
+ALLOWED_AUDIO = {".webm", ".ogg", ".wav", ".mp3", ".m4a", ".mp4"}
+
+
+@router.post("/{activity_id}/read-check")
+async def read_check(activity_id: int, index: int = Form(...), file: UploadFile = File(...),
+                     user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Child reads one practice sentence aloud; returns Whisper's transcript plus the
+    pronunciation layer's word flags so the activity can give instant feedback. The
+    recording is analysed and then deleted - practice audio is never kept."""
+    a = db.get(PracticeActivity, activity_id)
+    if a is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Activity not found")
+    get_child_or_403(db, user, a.child_id)
+    items = a.content.get("reading") or []
+    if a.kind != "reading" or not 0 <= index < len(items):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Not a reading practice item")
+    suffix = Path(file.filename or "").suffix.lower() or ".webm"
+    if suffix not in ALLOWED_AUDIO:
+        raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, f"Unsupported audio type {suffix}")
+    data = await file.read()
+    if len(data) < 200 or len(data) > 15 * 1024 * 1024:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Recording is empty or too large")
+    sentence = items[index]["sentence"]
+    storage = get_storage()
+    key = storage.save(f"practice_tmp/{a.id}_{index}{suffix}", data)
+    try:
+        feats, engine = await run_in_threadpool(analyse_audio_file, key, sentence, "passage", True)
+    except Exception as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Could not analyse recording: {exc}")
+    finally:
+        storage.delete(key)
+        storage.delete(key.rsplit(".", 1)[0] + ".16k.wav")
+    pron = feats.get("pronunciation") or {}
+    flagged = pron.get("flagged_words") or []
+    accuracy = feats.get("accuracy", 0.0)
+    if engine == "demo":
+        message = "Demo mode: no real speech recognition is running."
+    elif not flagged and accuracy >= 0.75:
+        message = "Lovely reading - every sound matched!"
+    elif flagged:
+        focus = sorted(flagged, key=lambda w: -len(w))[:3]  # name content words, not "a"/"i"
+        message = "Nice try! Have another go at: " + ", ".join(focus)
+    else:
+        message = "Good effort - try reading it once more, a little slower."
+    return {"sentence": sentence, "engine": engine, "transcript": feats.get("transcript", ""),
+            "accuracy": accuracy, "pronunciation": pron or None, "flagged_words": flagged, "message": message}

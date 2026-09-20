@@ -15,6 +15,7 @@ import argparse
 import csv
 import json
 import random
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -27,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from lexora_speech import get_transcriber, speech_features  # noqa: E402
+from lexora_speech.pronunciation import DEFAULT_MODEL  # noqa: E402
 from lexora_speech.audio import ffmpeg_exe  # noqa: E402
 
 RAW = ROOT / "data/raw/aser"
@@ -66,6 +68,7 @@ def main():
     ap.add_argument("--per-level", type=int, default=30)
     ap.add_argument("--seed", type=int, default=20260919)
     ap.add_argument("--model", default="small")
+    ap.add_argument("--pronunciation-model", default=DEFAULT_MODEL, help="empty string to skip the phoneme layer")
     args = ap.parse_args()
 
     tr = get_transcriber(args.model, "cpu")
@@ -77,11 +80,16 @@ def main():
     t0 = time.time()
     per_level = defaultdict(lambda: {"n": 0, "agree": 0, "tp": 0, "fp": 0, "fn": 0, "tn": 0, "empty_transcripts": 0})
     wpm_correct, examples = [], []
+    # phoneme-layer evaluation: collect (level, examiner, PER, whisper_correct) per clip
+    pron_rows = []
     with tempfile.TemporaryDirectory() as td:
         for i, r in enumerate(items, 1):
             wav = decode(r, Path(td))
             t = tr.transcribe(str(wav), r["que_text"])
-            f = speech_features(str(wav), t, r["que_text"], r["level"])
+            f = speech_features(str(wav), t, r["que_text"], r["level"], pronunciation_model=args.pronunciation_model or None)
+            pron = f.get("pronunciation") or {}
+            if pron.get("scored"):
+                pron_rows.append((r["level"], r["isCorrect"] == "True", pron["phoneme_error_rate"], f["item_correct"]))
             examiner = r["isCorrect"] == "True"
             whisper = f["item_correct"]
             st = per_level[r["level"]]
@@ -110,13 +118,41 @@ def main():
         summary[lvl] = {**st, "agreement": round(st["agree"] / st["n"], 3),
                         "precision_vs_examiner": round(prec, 3) if prec is not None else None,
                         "recall_vs_examiner": round(rec, 3) if rec is not None else None}
+    # Phoneme layer: choose, per level, the PER threshold that best agrees with the examiner,
+    # and report agreement for the phoneme judgement alone and combined with Whisper.
+    phoneme = {}
+    for lvl in LEVELS:
+        rows = [x for x in pron_rows if x[0] == lvl]
+        if len(rows) < 10:
+            continue
+        best = None
+        for thr in [0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6]:
+            agree = sum((per <= thr) == ex for _, ex, per, _ in rows) / len(rows)
+            if best is None or agree > best[1]:
+                best = (thr, agree)
+        thr = best[0]
+        both = sum(((per <= thr) and wc) == ex for _, ex, per, wc in rows) / len(rows)
+        either = sum(((per <= thr) or wc) == ex for _, ex, per, wc in rows) / len(rows)
+        whisper_only = sum(wc == ex for _, ex, per, wc in rows) / len(rows)
+        tp = sum(1 for _, ex, per, _ in rows if ex and per <= thr); fp = sum(1 for _, ex, per, _ in rows if not ex and per <= thr)
+        fn = sum(1 for _, ex, per, _ in rows if ex and per > thr)
+        phoneme[lvl] = {"n": len(rows), "best_per_threshold": thr, "agreement_phoneme": round(best[1], 3),
+                        "agreement_whisper": round(whisper_only, 3), "agreement_both_must_pass": round(both, 3),
+                        "agreement_either_passes": round(either, 3),
+                        "precision_vs_examiner": round(tp / (tp + fp), 3) if tp + fp else None,
+                        "recall_vs_examiner": round(tp / (tp + fn), 3) if tp + fn else None,
+                        "median_per_examiner_correct": round(statistics.median([per for _, ex, per, _ in rows if ex]), 3) if any(ex for _, ex, _, _ in rows) else None,
+                        "median_per_examiner_incorrect": round(statistics.median([per for _, ex, per, _ in rows if not ex]), 3) if any(not ex for _, ex, _, _ in rows) else None}
+
     report = {
         "validated_at": time.strftime("%Y-%m-%d"),
-        "component": "lexora_speech (faster-whisper transcription + item_is_correct scoring)",
+        "component": "lexora_speech (faster-whisper transcription + item_is_correct scoring; phoneme pronunciation layer)",
         "engine": tr.engine,
         "sampling": f"{args.per_level} clips per level, balanced on examiner label, seed {args.seed}",
         "clips": len(items),
         "per_level_agreement_with_examiner": summary,
+        "phoneme_layer": {"model": args.pronunciation_model or None, "per_level": phoneme,
+                          "note": "PER = accent-tolerant phoneme error rate vs dictionary pronunciation; threshold chosen per level on this sample (optimistic by construction), reported alongside Whisper on the same clips."},
         "sentence_wpm_examiner_correct": {
             "n": len(wpm_correct),
             "median": round(sorted(wpm_correct)[len(wpm_correct) // 2], 1) if wpm_correct else None,
@@ -135,6 +171,8 @@ def main():
     OUT.write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
     for lvl, st in summary.items():
         print(f"{lvl}: n={st['n']} agreement={st['agreement']} precision={st['precision_vs_examiner']} recall={st['recall_vs_examiner']} empty={st['empty_transcripts']}")
+    for lvl, ph in phoneme.items():
+        print(f"phoneme {lvl}: n={ph['n']} thr={ph['best_per_threshold']} agree phoneme={ph['agreement_phoneme']} whisper={ph['agreement_whisper']} both={ph['agreement_both_must_pass']} either={ph['agreement_either_passes']} | median PER correct={ph['median_per_examiner_correct']} incorrect={ph['median_per_examiner_incorrect']}")
     print("sentence wpm:", report["sentence_wpm_examiner_correct"])
     print("wrote", OUT)
 

@@ -1,7 +1,7 @@
 import { BookOpen, Check, Ear, PenLine, Sparkles, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BAND_SHORT, LEVEL_LABEL, PATTERN_LABEL, SKILL_LABEL, fmtDate, fmtDateTime, pct } from '../lib/format'
+import { BAND_SHORT, LEVEL_LABEL, PATTERN_LABEL, SKILL_LABEL, fmtDate, fmtDateTime, pct, phones } from '../lib/format'
 import type { Report, WordError } from '../lib/types'
 import { ContributionBars, IndicatorDial } from './charts'
 import { DemoBadge, Disclaimer, Section } from './ui'
@@ -19,14 +19,32 @@ function WordErrors({ errors }: { errors: WordError[] }) {
   )
 }
 
-export default function ReportView({ report, practiceHref, onRemark }: {
+/** Transcript with low-confidence words flagged so a teacher knows where to listen. */
+function ConfidentTranscript({ text, words }: { text: string; words?: { text: string; confidence: number }[] }) {
+  if (!words || words.length === 0) return <>{text || <em>nothing recognised</em>}</>
+  return (
+    <>
+      {words.map((w, i) => (
+        <span key={i} className={w.confidence < 0.6 ? 'rounded bg-sun-100 px-0.5 underline decoration-sun-700 decoration-dotted' : ''}
+          title={w.confidence < 0.6 ? `Whisper was unsure (${Math.round(w.confidence * 100)}%)` : undefined}>{w.text}{' '}</span>
+      ))}
+    </>
+  )
+}
+
+export default function ReportView({ report, practiceHref, onRemark, onCorrectTranscript }: {
   report: Report
   practiceHref?: string
   /** Teacher-only: override a reading item's mark; the session is re-scored by the server. */
   onRemark?: (taskId: number, correct: boolean) => Promise<void>
+  /** Teacher-only: replace Whisper's transcript with what the child actually said. */
+  onCorrectTranscript?: (taskId: number, transcript: string) => Promise<void>
 }) {
   const { indicator, reading, writing, speech, error_profile } = report
   const [remarking, setRemarking] = useState<number | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
   const isDemo = indicator.session_mode === 'demo'
   const patterns = Object.entries(writing.pattern_counts ?? {}).sort((a, b) => b[1] - a[1])
 
@@ -105,7 +123,7 @@ export default function ReportView({ report, practiceHref, onRemark }: {
                       <li key={it.task_id ?? it.prompt} className="flex items-center justify-between gap-2 rounded-lg bg-cream-100 px-2 py-1.5 text-xs">
                         <span className="min-w-0 flex-1">
                           <span className="font-display text-base font-bold">{it.prompt}</span>
-                          <span className="ml-2 text-navy-500">{it.engine === 'examiner' ? 'examiner' : it.engine ?? '—'}{it.transcript ? ` · heard “${it.transcript}”` : ''}</span>
+                          <span className="ml-2 text-navy-500">{it.engine === 'examiner' ? 'examiner' : it.engine ?? '—'}{it.transcript ? ` · heard “${it.transcript}”` : ''}{it.pronunciation_flagged === true && ' · sounds differ'}{it.pronunciation_flagged === false && ' · sounds match'}</span>
                         </span>
                         <span className={`badge ${it.correct ? 'bg-teal-100 text-teal-700' : it.correct === false ? 'bg-coral-100 text-coral-500' : 'bg-cream-200'}`}>{it.correct ? 'correct' : it.correct === false ? 'incorrect' : 'unjudged'}</span>
                         {it.task_id !== undefined && (
@@ -160,12 +178,46 @@ export default function ReportView({ report, practiceHref, onRemark }: {
                 <div className="rounded-xl bg-cream-100 px-3 py-2"><dt className="text-xs text-navy-500">Class reference</dt><dd className="font-bold">{speech.wpm_reference ? `${Math.round(speech.wpm_reference)} wpm` : '—'}</dd></div>
                 <div className="rounded-xl bg-cream-100 px-3 py-2"><dt className="text-xs text-navy-500">Long pauses</dt><dd className="font-bold">{speech.long_pauses ?? '—'}</dd></div>
               </dl>
+              {speech.pronunciation?.scored && (
+                <div className="mt-3 rounded-xl border border-cream-200 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-bold">Pronunciation</p>
+                    <span className="text-xs text-navy-500">{pct(speech.pronunciation.phoneme_error_rate)} sound mismatch</span>
+                  </div>
+                  {speech.pronunciation.flagged_words && speech.pronunciation.flagged_words.length > 0 ? (
+                    <ul className="mt-2 flex flex-wrap gap-1.5">
+                      {speech.pronunciation.words?.filter((w) => w.flagged).map((w, i) => (
+                        <li key={i} className="rounded-lg bg-sun-100 px-2 py-1 text-xs" title={`expected /${phones(w.expected)}/, heard /${phones(w.heard) || '—'}/`}>
+                          <span className="font-bold">{w.word}</span> <span className="text-navy-500">heard as /{phones(w.heard) || '…'}/</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p className="mt-1 text-xs text-teal-700">Every word's sounds matched its dictionary pronunciation.</p>}
+                  <p className="mt-2 text-xs text-navy-500">Independent phoneme listener ({speech.pronunciation.engine}) with no language model, so it cannot “repair” a mispronounced word the way Whisper does. Indian-English variants (v/w, t/th, d/dh) are not counted as errors.</p>
+                </div>
+              )}
               <p className="mt-3 text-xs text-navy-500">Transcribed by <strong>{speech.engine}</strong>{speech.engine === 'demo' && ' — demo transcriber, not real speech recognition'}.</p>
-              <details className="mt-2 text-sm">
+              <details className="mt-2 text-sm" open={editing}>
                 <summary className="cursor-pointer font-bold text-navy-700">Passage and transcript</summary>
                 <p className="mt-2 rounded-xl bg-cream-100 p-2 text-xs"><span className="font-bold">Passage:</span> {speech.prompt}</p>
-                <p className="mt-1 rounded-xl bg-cream-100 p-2 text-xs"><span className="font-bold">Heard:</span> {speech.transcript || <em>nothing recognised</em>}</p>
+                <p className="mt-1 rounded-xl bg-cream-100 p-2 text-xs"><span className="font-bold">Heard:</span> <ConfidentTranscript text={speech.transcript ?? ''} words={speech.words} /></p>
+                {speech.words && speech.words.some((w) => w.confidence < 0.6) && <p className="mt-1 text-xs text-navy-500">Highlighted words are ones the recogniser was unsure about.</p>}
+                {speech.whisper_transcript !== undefined && <p className="mt-1 text-xs text-navy-500">Whisper originally heard: “{speech.whisper_transcript}”</p>}
                 {speech.word_errors && <div className="mt-2"><WordErrors errors={speech.word_errors} /></div>}
+                {onCorrectTranscript && speech.task_id !== undefined && (
+                  <div className="no-print mt-3">
+                    {!editing ? (
+                      <button type="button" className="btn-secondary" onClick={() => { setDraft(speech.transcript ?? ''); setEditing(true) }}>Correct what the child said</button>
+                    ) : (
+                      <form onSubmit={async (e) => { e.preventDefault(); if (!draft.trim()) return; setSaving(true); try { await onCorrectTranscript(speech.task_id!, draft.trim()); setEditing(false) } finally { setSaving(false) } }}>
+                        <label className="label" htmlFor="transcript-fix">What the child actually said</label>
+                        <textarea id="transcript-fix" className="input" rows={3} value={draft} onChange={(e) => setDraft(e.target.value)} />
+                        <p className="mt-1 text-xs text-navy-500">Whisper both mishears accented speech and quietly “repairs” mispronunciations (e.g. hearing “shirt” for a mispronounced word). Write it as spoken; mismatch features and the indicator are recalculated, the original stays on record.</p>
+                        <div className="mt-2 flex gap-2"><button className="btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Save correction'}</button><button type="button" className="btn-ghost" onClick={() => setEditing(false)}>Cancel</button></div>
+                      </form>
+                    )}
+                  </div>
+                )}
               </details>
             </>
           ) : <p className="text-sm text-navy-500">Speech task was not completed.</p>}

@@ -21,6 +21,12 @@ faster-whisper>=1.0
 soundfile>=0.12
 imageio-ffmpeg>=0.5   # bundles an ffmpeg binary so no system install is needed
 
+# pronunciation layer (optional at runtime: set PRONUNCIATION_MODEL= to skip). CPU torch is
+# enough: pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+transformers>=4.40
+cmudict>=1.0
+
 # optional
 pymysql>=1.1          # only if DATABASE_URL points at MySQL
 pytest>=8.0

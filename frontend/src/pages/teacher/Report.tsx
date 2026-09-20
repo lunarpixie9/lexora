@@ -28,6 +28,10 @@ export default function ReportPage() {
         onRemark={user?.role === 'teacher' ? async (taskId, correct) => {
           try { await api.markItem(report.session_id, taskId, { correct, mistakes: correct ? 0 : 1 }); await load() }
           catch (e) { setError((e as Error).message) }
+        } : undefined}
+        onCorrectTranscript={user?.role === 'teacher' ? async (taskId, transcript) => {
+          try { await api.correctTranscript(report.session_id, taskId, transcript); await load() }
+          catch (e) { setError((e as Error).message) }
         } : undefined} />
     </div>
   )
