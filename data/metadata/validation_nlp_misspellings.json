@@ -1,0 +1,78 @@
+{
+ "validated_at": "2026-09-19",
+ "component": "lexora_nlp.classify_word_error / analyze_text",
+ "note": "Component validation only. Birkbeck = mixed adult/child misspellings; Holbrook = real schoolchildren's writing. No dyslexia labels exist in these corpora.",
+ "birkbeck_sample": {
+  "pairs_evaluated": 5000,
+  "identical_after_normalisation": 16,
+  "real_errors": 4984,
+  "detected_as_error": 4984,
+  "detection_rate": 1.0,
+  "assigned_at_least_one_pattern": 4936,
+  "pattern_coverage": 0.9904,
+  "phonetically_plausible_share": 0.7187,
+  "mean_edit_distance": 2.568,
+  "pattern_distribution": {
+   "phonetic_spelling": 3582,
+   "letter_substitution": 2504,
+   "vowel_confusion": 886,
+   "letter_omission": 805,
+   "letter_addition": 481,
+   "letter_transposition": 133,
+   "mirror_letter_reversal": 50,
+   "double_letter_dropped": 37,
+   "sequence_reversal": 1
+  },
+  "false_positives_on_correct_words": 0,
+  "control_words_checked": 1000
+ },
+ "holbrook_missp": {
+  "pairs_evaluated": 1631,
+  "identical_after_normalisation": 3,
+  "real_errors": 1628,
+  "detected_as_error": 1628,
+  "detection_rate": 1.0,
+  "assigned_at_least_one_pattern": 1615,
+  "pattern_coverage": 0.992,
+  "phonetically_plausible_share": 0.7009,
+  "mean_edit_distance": 1.682,
+  "pattern_distribution": {
+   "phonetic_spelling": 1141,
+   "letter_omission": 580,
+   "letter_substitution": 558,
+   "letter_addition": 201,
+   "vowel_confusion": 177,
+   "letter_transposition": 68,
+   "mirror_letter_reversal": 12,
+   "double_letter_dropped": 8,
+   "sequence_reversal": 1
+  },
+  "false_positives_on_correct_words": 0,
+  "control_words_checked": 1000
+ },
+ "holbrook_tagged_running_text": {
+  "pairs_evaluated": 2392,
+  "identical_after_normalisation": 3,
+  "real_errors": 2389,
+  "detected_as_error": 2389,
+  "detection_rate": 1.0,
+  "assigned_at_least_one_pattern": 2371,
+  "pattern_coverage": 0.9925,
+  "phonetically_plausible_share": 0.707,
+  "mean_edit_distance": 1.596,
+  "pattern_distribution": {
+   "phonetic_spelling": 1689,
+   "letter_omission": 978,
+   "letter_substitution": 737,
+   "letter_addition": 303,
+   "vowel_confusion": 230,
+   "letter_transposition": 90,
+   "mirror_letter_reversal": 13,
+   "double_letter_dropped": 10,
+   "sequence_reversal": 2
+  },
+  "false_positives_on_correct_words": 0,
+  "control_words_checked": 1000
+ },
+ "runtime_seconds": 1.9
+}

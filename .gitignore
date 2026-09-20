@@ -30,3 +30,13 @@ Thumbs.db
 .DS_Store
 .vscode/
 .idea/
+
+# Backend runtime state (SQLite DB, uploaded recordings, converted audio)
+backend/storage/
+.pytest_cache/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Whisper model cache lives in the user's home (~/.cache/huggingface), not here

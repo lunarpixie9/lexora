@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Lexora design tokens: warm cream, deep navy, muted lavender, soft teal, warm yellow. */
+@theme {
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+
+  --color-cream-50: #fdfbf7;
+  --color-cream-100: #faf6ee;
+  --color-cream-200: #f1eadc;
+  --color-cream-300: #e4dac6;
+
+  --color-navy-500: #34415f;
+  --color-navy-700: #263352;
+  --color-navy-900: #1f2a44;
+
+  --color-lavender-100: #efeaf8;
+  --color-lavender-200: #ddd3f0;
+  --color-lavender-400: #b8a9d9;
+  --color-lavender-600: #8e7cc3;
+
+  --color-teal-100: #e3f3f3;
+  --color-teal-300: #a8dad9;
+  --color-teal-500: #4fa3a5;
+  --color-teal-700: #357c7e;
+
+  --color-sun-100: #fdf3d6;
+  --color-sun-300: #f8dd8a;
+  --color-sun-500: #f2c14e;
+  --color-sun-700: #c9961d;
+
+  --color-coral-100: #fbe6e0;
+  --color-coral-500: #e07a5f;
+
+  --shadow-card: 0 1px 2px rgb(31 42 68 / 0.04), 0 8px 24px -12px rgb(31 42 68 / 0.18);
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-cream-100 text-navy-900 font-sans antialiased;
+}
+
+h1, h2, h3 {
+  @apply font-display tracking-tight;
+}
+
+/* focus ring that works on cream backgrounds */
+:focus-visible {
+  outline: 3px solid var(--color-teal-300);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-cream-200;
+  }
+
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-navy-900 text-white hover:bg-navy-700; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-lavender-100 text-navy-900 hover:bg-lavender-200; }
+  .btn-teal { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-teal-500 text-white hover:bg-teal-700; }
+  .btn-sun { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-sun-500 text-navy-900 hover:bg-sun-300; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed text-navy-700 hover:bg-cream-200; }
+  .btn-lg { @apply px-6 py-3.5 text-base rounded-2xl; }
+
+  .input {
+    @apply w-full rounded-xl border border-cream-300 bg-white px-3.5 py-2.5 text-navy-900 placeholder:text-navy-500/50
+      focus:border-teal-500 focus:ring-2 focus:ring-teal-300;
+  }
+
+  .label { @apply block text-sm font-bold text-navy-700 mb-1.5; }
+
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.recording-ring::after {
+  content: "";
+  position: absolute; inset: 0; border-radius: 9999px;
+  border: 3px solid var(--color-coral-500);
+  animation: pulse-ring 1.2s ease-out infinite;
+}
+
+@media print {
+  aside, header, nav, .no-print { display: none !important; }
+  main { padding: 0 !important; max-width: none !important; }
+  .card { box-shadow: none; border-color: #ddd; break-inside: avoid; }
+  body { background: #fff; }
+}

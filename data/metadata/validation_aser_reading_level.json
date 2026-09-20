@@ -1,0 +1,316 @@
+{
+ "model": "xgboost.XGBClassifier multi:softprob",
+ "version": "aser-reading-level-1.0",
+ "trained_at": "2026-09-19",
+ "dataset": "ASER (Pratham) English subtest, CC BY-NC-SA 4.0; sessions with examiner level and class 1-8",
+ "n_sessions": 4908,
+ "n_train": 3926,
+ "n_test": 982,
+ "feature_names": [
+  "class_grade",
+  "attempted_CL",
+  "items_CL",
+  "accuracy_CL",
+  "mean_mistakes_CL",
+  "mean_seconds_CL",
+  "attempted_SL",
+  "items_SL",
+  "accuracy_SL",
+  "mean_mistakes_SL",
+  "mean_seconds_SL",
+  "attempted_W",
+  "items_W",
+  "accuracy_W",
+  "mean_mistakes_W",
+  "mean_seconds_W",
+  "attempted_S",
+  "items_S",
+  "accuracy_S",
+  "mean_mistakes_S",
+  "mean_seconds_S",
+  "items_total",
+  "accuracy_overall",
+  "highest_level_attempted"
+ ],
+ "classes": [
+  "Beginner",
+  "Capital letter",
+  "Small letter",
+  "word",
+  "Sentence"
+ ],
+ "metrics": {
+  "holdout_accuracy": 0.888,
+  "holdout_macro_f1": 0.8765,
+  "confusion_matrix_rows_true_cols_pred": [
+   [
+    129,
+    8,
+    2,
+    1,
+    0
+   ],
+   [
+    12,
+    103,
+    6,
+    1,
+    1
+   ],
+   [
+    0,
+    11,
+    273,
+    6,
+    2
+   ],
+   [
+    0,
+    3,
+    21,
+    125,
+    19
+   ],
+   [
+    0,
+    0,
+    3,
+    14,
+    242
+   ]
+  ],
+  "rule_based_baseline_accuracy_all_sessions": 0.7471
+ },
+ "shap_mean_abs_by_feature": [
+  {
+   "feature": "accuracy_W",
+   "mean_abs_shap": 0.5594
+  },
+  {
+   "feature": "mean_mistakes_S",
+   "mean_abs_shap": 0.4734
+  },
+  {
+   "feature": "mean_seconds_W",
+   "mean_abs_shap": 0.3849
+  },
+  {
+   "feature": "accuracy_SL",
+   "mean_abs_shap": 0.3041
+  },
+  {
+   "feature": "mean_seconds_SL",
+   "mean_abs_shap": 0.2883
+  },
+  {
+   "feature": "mean_seconds_CL",
+   "mean_abs_shap": 0.2834
+  },
+  {
+   "feature": "accuracy_CL",
+   "mean_abs_shap": 0.2777
+  },
+  {
+   "feature": "mean_seconds_S",
+   "mean_abs_shap": 0.2625
+  },
+  {
+   "feature": "items_W",
+   "mean_abs_shap": 0.2313
+  },
+  {
+   "feature": "accuracy_overall",
+   "mean_abs_shap": 0.2031
+  },
+  {
+   "feature": "class_grade",
+   "mean_abs_shap": 0.2008
+  },
+  {
+   "feature": "accuracy_S",
+   "mean_abs_shap": 0.1729
+  },
+  {
+   "feature": "mean_mistakes_SL",
+   "mean_abs_shap": 0.1631
+  },
+  {
+   "feature": "items_S",
+   "mean_abs_shap": 0.153
+  },
+  {
+   "feature": "items_total",
+   "mean_abs_shap": 0.1405
+  },
+  {
+   "feature": "mean_mistakes_W",
+   "mean_abs_shap": 0.0897
+  },
+  {
+   "feature": "highest_level_attempted",
+   "mean_abs_shap": 0.0671
+  },
+  {
+   "feature": "items_SL",
+   "mean_abs_shap": 0.0553
+  },
+  {
+   "feature": "mean_mistakes_CL",
+   "mean_abs_shap": 0.0533
+  },
+  {
+   "feature": "items_CL",
+   "mean_abs_shap": 0.04
+  },
+  {
+   "feature": "attempted_S",
+   "mean_abs_shap": 0.0129
+  },
+  {
+   "feature": "attempted_CL",
+   "mean_abs_shap": 0.0027
+  },
+  {
+   "feature": "attempted_W",
+   "mean_abs_shap": 0.0014
+  },
+  {
+   "feature": "attempted_SL",
+   "mean_abs_shap": 0.0013
+  }
+ ],
+ "class_norms": {
+  "1": {
+   "n": 572,
+   "distribution": {
+    "Beginner": 0.4668,
+    "Capital letter": 0.1853,
+    "Small letter": 0.2465,
+    "word": 0.0787,
+    "Sentence": 0.0227
+   },
+   "median_level": "Capital letter"
+  },
+  "2": {
+   "n": 765,
+   "distribution": {
+    "Beginner": 0.2405,
+    "Capital letter": 0.1856,
+    "Small letter": 0.349,
+    "word": 0.1242,
+    "Sentence": 0.1007
+   },
+   "median_level": "Small letter"
+  },
+  "3": {
+   "n": 512,
+   "distribution": {
+    "Beginner": 0.1641,
+    "Capital letter": 0.2168,
+    "Small letter": 0.3633,
+    "word": 0.1484,
+    "Sentence": 0.1074
+   },
+   "median_level": "Small letter"
+  },
+  "4": {
+   "n": 557,
+   "distribution": {
+    "Beginner": 0.1149,
+    "Capital letter": 0.1454,
+    "Small letter": 0.3734,
+    "word": 0.1885,
+    "Sentence": 0.1777
+   },
+   "median_level": "Small letter"
+  },
+  "5": {
+   "n": 701,
+   "distribution": {
+    "Beginner": 0.0571,
+    "Capital letter": 0.0984,
+    "Small letter": 0.3509,
+    "word": 0.2126,
+    "Sentence": 0.281
+   },
+   "median_level": "Small letter"
+  },
+  "6": {
+   "n": 655,
+   "distribution": {
+    "Beginner": 0.0504,
+    "Capital letter": 0.0779,
+    "Small letter": 0.2794,
+    "word": 0.2198,
+    "Sentence": 0.3725
+   },
+   "median_level": "word"
+  },
+  "7": {
+   "n": 606,
+   "distribution": {
+    "Beginner": 0.0264,
+    "Capital letter": 0.0561,
+    "Small letter": 0.2195,
+    "word": 0.2294,
+    "Sentence": 0.4686
+   },
+   "median_level": "word"
+  },
+  "8": {
+   "n": 540,
+   "distribution": {
+    "Beginner": 0.0259,
+    "Capital letter": 0.0407,
+    "Small letter": 0.1722,
+    "word": 0.1611,
+    "Sentence": 0.6
+   },
+   "median_level": "Sentence"
+  }
+ },
+ "sentence_wpm_reference_by_class": {
+  "1": {
+   "n": 37,
+   "median_wpm": 50.8,
+   "p25_wpm": 31.3
+  },
+  "2": {
+   "n": 265,
+   "median_wpm": 59.5,
+   "p25_wpm": 43.9
+  },
+  "3": {
+   "n": 209,
+   "median_wpm": 60.6,
+   "p25_wpm": 40.8
+  },
+  "4": {
+   "n": 330,
+   "median_wpm": 62.0,
+   "p25_wpm": 41.2
+  },
+  "5": {
+   "n": 690,
+   "median_wpm": 66.3,
+   "p25_wpm": 46.0
+  },
+  "6": {
+   "n": 923,
+   "median_wpm": 65.9,
+   "p25_wpm": 46.9
+  },
+  "7": {
+   "n": 1004,
+   "median_wpm": 69.8,
+   "p25_wpm": 53.0
+  },
+  "8": {
+   "n": 1071,
+   "median_wpm": 75.0,
+   "p25_wpm": 55.3
+  }
+ },
+ "caveat": "The examiner level is assigned from the same item performance that the features summarise, so high accuracy is expected. This validates the feature-to-reading-level mapping and provides real class-wise norms; it says nothing about dyslexia.",
+ "runtime_seconds": 4.0
+}

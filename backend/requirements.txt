@@ -1,0 +1,27 @@
+# Lexora backend — install with: python -m pip install -r requirements.txt
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pydantic-settings>=2.3
+sqlalchemy>=2.0
+python-multipart>=0.0.9
+pyjwt>=2.8
+python-dotenv>=1.0
+httpx>=0.27
+
+# data / ML
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+xgboost>=2.1
+shap>=0.46
+
+# speech (Whisper runs locally on CPU; model weights download once, ~150 MB for "small")
+faster-whisper>=1.0
+soundfile>=0.12
+imageio-ffmpeg>=0.5   # bundles an ffmpeg binary so no system install is needed
+
+# optional
+pymysql>=1.1          # only if DATABASE_URL points at MySQL
+pytest>=8.0
+email-validator>=2.0
