@@ -1,0 +1,109 @@
+{
+ "experiment": "XGBoost + SHAP methodological validation on Rello et al. (PLOS ONE 2020)",
+ "validated_at": "2026-09-19",
+ "dataset": "luzrello/dyslexia (Kaggle, CC BY 4.0) - Spanish Dytective test, ages 7-17",
+ "n_desktop": 3644,
+ "positives_desktop": 392,
+ "n_tablet": 1395,
+ "positives_tablet": 148,
+ "features_used": 195,
+ "preprocessing": [
+  "Accuracy/Missrate recomputed from Hits/Misses/Clicks",
+  "tablet NULL -> NaN (XGBoost native missing handling)",
+  "Nativelang dropped (inconsistent encoding between files)",
+  "scale_pos_weight=8.30 for class imbalance"
+ ],
+ "cv_5fold_desktop_mean": {
+  "roc_auc": 0.8551,
+  "recall@0.5": 0.4591,
+  "precision@0.5": 0.5259,
+  "f1@0.5": 0.4867,
+  "recall@0.3": 0.6123,
+  "precision@0.3": 0.4029,
+  "f1@0.3": 0.4847
+ },
+ "cv_5fold_desktop_sd": {
+  "roc_auc": 0.0132,
+  "recall@0.5": 0.0796,
+  "precision@0.5": 0.0388,
+  "f1@0.5": 0.0501,
+  "recall@0.3": 0.0842,
+  "precision@0.3": 0.0138,
+  "f1@0.3": 0.0348
+ },
+ "train_desktop_test_tablet": {
+  "roc_auc": 0.571,
+  "recall@0.5": 0.0203,
+  "precision@0.5": 0.75,
+  "f1@0.5": 0.0395,
+  "recall@0.3": 0.0338,
+  "precision@0.3": 0.5556,
+  "f1@0.3": 0.0637
+ },
+ "paper_reference": "Rello et al. report recall as the primary metric for the dyslexia class",
+ "transfer_note": "The tablet dataset is an age-customised test version in which 13 of 32 items are missing for most children, so a model trained on the desktop version transfers poorly to it. This is reported as-is: it illustrates that such classifiers are tied to the exact instrument they were trained on - one more reason Lexora's indicator is not a diagnostic claim.",
+ "shap_top_features_mean_abs": [
+  {
+   "feature": "Age",
+   "mean_abs_shap": 0.9648
+  },
+  {
+   "feature": "Clicks28",
+   "mean_abs_shap": 0.5488
+  },
+  {
+   "feature": "Clicks25",
+   "mean_abs_shap": 0.3651
+  },
+  {
+   "feature": "Clicks24",
+   "mean_abs_shap": 0.2819
+  },
+  {
+   "feature": "Clicks27",
+   "mean_abs_shap": 0.1548
+  },
+  {
+   "feature": "Clicks15",
+   "mean_abs_shap": 0.1456
+  },
+  {
+   "feature": "Score28",
+   "mean_abs_shap": 0.132
+  },
+  {
+   "feature": "Score20",
+   "mean_abs_shap": 0.1286
+  },
+  {
+   "feature": "Score22",
+   "mean_abs_shap": 0.1235
+  },
+  {
+   "feature": "Clicks20",
+   "mean_abs_shap": 0.1101
+  },
+  {
+   "feature": "Accuracy31",
+   "mean_abs_shap": 0.1094
+  },
+  {
+   "feature": "Hits28",
+   "mean_abs_shap": 0.1073
+  },
+  {
+   "feature": "Clicks4",
+   "mean_abs_shap": 0.1027
+  },
+  {
+   "feature": "Missrate31",
+   "mean_abs_shap": 0.0955
+  },
+  {
+   "feature": "Accuracy20",
+   "mean_abs_shap": 0.0954
+  }
+ ],
+ "interpretation": "The classifier separates diagnosed from non-diagnosed children well above chance and SHAP attributes the decision to a small set of game-performance features. This validates the method Lexora uses (gradient-boosted trees + SHAP), NOT Lexora's own indicator: the features, language and population differ, and no clinical validity is claimed for Lexora.",
+ "runtime_seconds": 12.3
+}

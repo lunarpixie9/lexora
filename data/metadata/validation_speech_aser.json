@@ -1,0 +1,235 @@
+{
+ "validated_at": "2026-09-19",
+ "component": "lexora_speech (faster-whisper transcription + item_is_correct scoring)",
+ "engine": "faster-whisper:small",
+ "sampling": "30 clips per level, balanced on examiner label, seed 20260919",
+ "clips": 120,
+ "per_level_agreement_with_examiner": {
+  "CL": {
+   "n": 30,
+   "agree": 20,
+   "tp": 5,
+   "fp": 0,
+   "fn": 10,
+   "tn": 15,
+   "empty_transcripts": 4,
+   "agreement": 0.667,
+   "precision_vs_examiner": 1.0,
+   "recall_vs_examiner": 0.333
+  },
+  "SL": {
+   "n": 30,
+   "agree": 24,
+   "tp": 10,
+   "fp": 1,
+   "fn": 5,
+   "tn": 14,
+   "empty_transcripts": 2,
+   "agreement": 0.8,
+   "precision_vs_examiner": 0.909,
+   "recall_vs_examiner": 0.667
+  },
+  "W": {
+   "n": 30,
+   "agree": 22,
+   "tp": 7,
+   "fp": 0,
+   "fn": 8,
+   "tn": 15,
+   "empty_transcripts": 1,
+   "agreement": 0.733,
+   "precision_vs_examiner": 1.0,
+   "recall_vs_examiner": 0.467
+  },
+  "S": {
+   "n": 30,
+   "agree": 23,
+   "tp": 10,
+   "fp": 2,
+   "fn": 5,
+   "tn": 13,
+   "empty_transcripts": 0,
+   "agreement": 0.767,
+   "precision_vs_examiner": 0.833,
+   "recall_vs_examiner": 0.667
+  }
+ },
+ "sentence_wpm_examiner_correct": {
+  "n": 15,
+  "median": 80.0,
+  "min": 12.3,
+  "max": 260.9
+ },
+ "examples": [
+  {
+   "level": "CL",
+   "expected": "K",
+   "transcript": "Okay",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "CL",
+   "expected": "S",
+   "transcript": "Yes",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "CL",
+   "expected": "O",
+   "transcript": "I'll put it on.",
+   "examiner_correct": true,
+   "whisper_correct": false
+  },
+  {
+   "level": "CL",
+   "expected": "N",
+   "transcript": "3, 2, 1.",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "CL",
+   "expected": "X",
+   "transcript": "I",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "CL",
+   "expected": "V",
+   "transcript": "You!",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "SL",
+   "expected": "w",
+   "transcript": "W",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "SL",
+   "expected": "b",
+   "transcript": "B",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "SL",
+   "expected": "g",
+   "transcript": "J.G.",
+   "examiner_correct": true,
+   "whisper_correct": false
+  },
+  {
+   "level": "SL",
+   "expected": "p",
+   "transcript": "B.",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "SL",
+   "expected": "g",
+   "transcript": "I",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "SL",
+   "expected": "g",
+   "transcript": "So, that's it for today, thank you so much for watching, and I'll see you in the next video.",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "W",
+   "expected": "big",
+   "transcript": "Big",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "W",
+   "expected": "fan",
+   "transcript": "Yes, ma'am. Ben.",
+   "examiner_correct": true,
+   "whisper_correct": false
+  },
+  {
+   "level": "W",
+   "expected": "red",
+   "transcript": "Z",
+   "examiner_correct": true,
+   "whisper_correct": false
+  },
+  {
+   "level": "W",
+   "expected": "dog",
+   "transcript": "I",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "W",
+   "expected": "dog",
+   "transcript": "B-O-E",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "W",
+   "expected": "pen",
+   "transcript": "You, we, see, watch.",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "S",
+   "expected": "I like to sing.",
+   "transcript": "I like to sing.",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "S",
+   "expected": "I like to sing.",
+   "transcript": "I like to sing",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "S",
+   "expected": "I like to read.",
+   "transcript": "I like to read",
+   "examiner_correct": true,
+   "whisper_correct": true
+  },
+  {
+   "level": "S",
+   "expected": "Where is your house?",
+   "transcript": "Why are you laughing? What is it? Please read the number, we have to go to the airport. Where? In the airport. I'm going to the airport. Okay.",
+   "examiner_correct": false,
+   "whisper_correct": false
+  },
+  {
+   "level": "S",
+   "expected": "Where is your house?",
+   "transcript": "Where is your house?",
+   "examiner_correct": false,
+   "whisper_correct": true
+  },
+  {
+   "level": "S",
+   "expected": "She has a green kite.",
+   "transcript": "Hello, how are you?",
+   "examiner_correct": false,
+   "whisper_correct": false
+  }
+ ],
+ "interpretation": "Agreement is expected to be high for sentences and words and low for isolated letters, where general-purpose ASR is unreliable. Lexora therefore keeps ASER's examiner-marking mode as the primary scoring path for the reading ladder and treats Whisper's letter judgement as advisory.",
+ "runtime_seconds": 1316.0
+}

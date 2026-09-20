@@ -89,3 +89,19 @@ Scripts live in `scripts/data/`. Run from the repository root with
 - Never commit `raw/` or `processed/`.
 - Cite each dataset in the report; CC BY-NC-SA sources restrict commercial use.
 - Synthetic/demo data must be labelled as such and never mixed into these directories.
+
+---
+
+## Component-validation outputs (2026-09-19)
+
+Produced by `scripts/validation/*.py` and `backend/lexora_ml/*.py`; served by the API at `/api/validation` and shown on the app's "How it works" page. They validate individual components on real data and do not establish clinical validity.
+
+| File | Component | Data | Headline |
+|---|---|---|---|
+| `metadata/validation_nlp_misspellings.json` | spelling-error engine | Birkbeck (5,000-pair sample) + Holbrook | 100% detection, ≥99% pattern coverage, 0 false positives |
+| `metadata/validation_aser_reading_level.json` | reading-level model (XGBoost + SHAP) + class norms + WPM reference | ASER, 4,908 sessions | held-out accuracy 0.888, macro-F1 0.877 |
+| `metadata/validation_speech_aser.json` | Whisper transcription + item scoring | 120 ASER clips (30 per level, balanced) | agreement with examiner 67–80%; letters weakest |
+| `metadata/validation_speech_nnces_pilot.json` | prompt-free speech measures | 40 NNCES pilot files | 0 empty transcripts, median word confidence 0.86 — **no prompt text exists; none was reconstructed** |
+| `metadata/validation_rello_xgboost_shap.json` | XGBoost + SHAP method (separate experiment) | Rello desktop + tablet | CV ROC-AUC 0.855; poor desktop→tablet transfer, reported as-is |
+
+The trained model artifact lives in `backend/lexora_ml/artifacts/` (regenerate with `python backend/lexora_ml/train_reading_level.py`).
