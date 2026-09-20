@@ -25,6 +25,7 @@ interface Validation {
   speech_aser: null | {
     engine: string; clips: number; sampling: string
     per_level_agreement_with_examiner: Record<string, { n: number; agreement: number; precision_vs_examiner: number | null; recall_vs_examiner: number | null; empty_transcripts: number }>
+    phoneme_layer?: { model: string | null; note: string; per_level: Record<string, { n: number; best_per_threshold: number; agreement_phoneme: number; agreement_whisper: number; agreement_either_passes: number; median_per_examiner_correct: number | null; median_per_examiner_incorrect: number | null }> }
     sentence_wpm_examiner_correct: { n: number; median: number | null }
     interpretation: string
   }
@@ -105,6 +106,22 @@ export default function Methodology() {
                   </tbody>
                 </table>
               </div>
+              {v.speech_aser.phoneme_layer && Object.keys(v.speech_aser.phoneme_layer.per_level).length > 0 && (
+                <>
+                  <p className="mt-4 text-sm font-bold">Pronunciation layer on the same clips (phoneme recogniser, no language model)</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="text-left text-xs uppercase tracking-wider text-navy-500"><tr><th className="py-1 pr-3">Level</th><th className="pr-3">Agreement — Whisper</th><th className="pr-3">Agreement — phonemes</th><th className="pr-3">Either passes</th><th className="pr-3">Median mismatch, examiner-correct</th><th>examiner-incorrect</th></tr></thead>
+                      <tbody>
+                        {Object.entries(v.speech_aser.phoneme_layer.per_level).map(([l, r]) => (
+                          <tr key={l} className="border-t border-cream-200"><td className="py-2 pr-3 font-bold">{LEVEL[l as keyof typeof LEVEL] ?? l}</td><td className="pr-3">{pct(r.agreement_whisper, 1)}</td><td className="pr-3">{pct(r.agreement_phoneme, 1)}</td><td className="pr-3">{pct(r.agreement_either_passes, 1)}</td><td className="pr-3">{pct(r.median_per_examiner_correct, 0)}</td><td>{pct(r.median_per_examiner_incorrect, 0)}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-2 text-xs text-navy-500">{v.speech_aser.phoneme_layer.note} Lexora therefore counts an item Whisper rejected as correct when the sounds matched, and uses the phoneme layer to flag mispronounced words that Whisper would silently repair (measured on a real test recording: “he as a blue shit” → Whisper “he has a blue shirt”).</p>
+                </>
+              )}
               <p className="mt-3 text-sm text-navy-700">{v.speech_aser.interpretation}</p>
               <p className="mt-1 text-xs text-navy-500">{v.speech_aser.sampling}. Median rate of correctly read sentences in this sample: {v.speech_aser.sentence_wpm_examiner_correct.median} wpm.</p>
             </Section>

@@ -34,6 +34,7 @@ python -m uvicorn app.main:app --reload --port 8000
 | `STORAGE_DIR` | `./storage` | recordings and converted audio (local storage backend; gitignored) |
 | `WHISPER_MODEL` | `small` | faster-whisper size: `tiny`/`base`/`small`/`medium`. Empty string disables Whisper (demo transcriber) |
 | `WHISPER_DEVICE` | `cpu` | `cuda` if you have a GPU with CTranslate2 support |
+| `PRONUNCIATION_MODEL` | `facebook/wav2vec2-xlsr-53-espeak-cv-ft` | phoneme recogniser for the pronunciation layer (downloads ~1.2 GB once, ~1.5 GB RAM). Empty string disables it; the app then simply omits pronunciation flags |
 | `GEMINI_API_KEY` | empty | optional Google Gemini free-tier key for AI-generated practice; leave empty to use the local deterministic generator |
 | `GEMINI_MODEL` | `gemini-2.0-flash` | |
 | `SEED_DEMO` | `true` | seed demo accounts/children on first start |
@@ -47,6 +48,11 @@ Never commit `.env`; it is gitignored. Secrets are never sent to the frontend.
 * First use of a recording loads the model (10–20 s) and downloads it if absent. Subsequent short clips take ~3–6 s on a laptop CPU.
 * If loading fails (no network, unsupported CPU), the health endpoint shows `whisper.state = unavailable` and the server uses the **demo transcriber**; the session is flagged `mode = demo` and every report says so.
 * To force the demo transcriber (e.g. for a fast presentation) set `WHISPER_MODEL=`.
+* `WHISPER_MODEL=large-v3-turbo` hears accented speech better but takes ~4× longer on CPU and ~2 GB RAM; it does *not* stop Whisper auto-correcting mispronunciations — that is what the pronunciation layer is for.
+
+### Pronunciation layer (phoneme recogniser)
+
+Loads on the first recording together with Whisper. Memory budget on a laptop: Whisper `small` ≈ 0.5 GB + phoneme model ≈ 1.5 GB + servers. With less than ~3 GB free, set `PRONUNCIATION_MODEL=` (or `WHISPER_MODEL=base`) before a demo. Requires `torch` (CPU build is enough) and `transformers` from `requirements.txt`.
 
 ### MySQL (the spec's target database)
 
@@ -83,7 +89,7 @@ Everything generated this way is flagged: children `is_demo`, sessions `mode = d
 ## 5. Tests and validation
 
 ```bash
-cd backend && python -m pytest -q tests        # 21 tests: NLP, ML, full API flow (uses a temp SQLite DB, no Whisper)
+cd backend && python -m pytest -q tests        # 26 tests: NLP, ML, pronunciation scoring, full API flow (temp SQLite DB, no models)
 cd frontend && npm run build                   # TypeScript errors fail the build
 ```
 

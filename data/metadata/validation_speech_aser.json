@@ -1,6 +1,6 @@
 {
- "validated_at": "2026-09-19",
- "component": "lexora_speech (faster-whisper transcription + item_is_correct scoring)",
+ "validated_at": "2026-09-20",
+ "component": "lexora_speech (faster-whisper transcription + item_is_correct scoring; phoneme pronunciation layer)",
  "engine": "faster-whisper:small",
  "sampling": "30 clips per level, balanced on examiner label, seed 20260919",
  "clips": 120,
@@ -31,15 +31,15 @@
   },
   "W": {
    "n": 30,
-   "agree": 22,
-   "tp": 7,
+   "agree": 21,
+   "tp": 6,
    "fp": 0,
-   "fn": 8,
+   "fn": 9,
    "tn": 15,
    "empty_transcripts": 1,
-   "agreement": 0.733,
+   "agreement": 0.7,
    "precision_vs_examiner": 1.0,
-   "recall_vs_examiner": 0.467
+   "recall_vs_examiner": 0.4
   },
   "S": {
    "n": 30,
@@ -53,6 +53,60 @@
    "precision_vs_examiner": 0.833,
    "recall_vs_examiner": 0.667
   }
+ },
+ "phoneme_layer": {
+  "model": "facebook/wav2vec2-xlsr-53-espeak-cv-ft",
+  "per_level": {
+   "CL": {
+    "n": 30,
+    "best_per_threshold": 0.5,
+    "agreement_phoneme": 0.7,
+    "agreement_whisper": 0.667,
+    "agreement_both_must_pass": 0.633,
+    "agreement_either_passes": 0.733,
+    "precision_vs_examiner": 0.875,
+    "recall_vs_examiner": 0.467,
+    "median_per_examiner_correct": 0.75,
+    "median_per_examiner_incorrect": 1.0
+   },
+   "SL": {
+    "n": 30,
+    "best_per_threshold": 0.3,
+    "agreement_phoneme": 0.767,
+    "agreement_whisper": 0.8,
+    "agreement_both_must_pass": 0.767,
+    "agreement_either_passes": 0.8,
+    "precision_vs_examiner": 1.0,
+    "recall_vs_examiner": 0.533,
+    "median_per_examiner_correct": 0.286,
+    "median_per_examiner_incorrect": 1.0
+   },
+   "W": {
+    "n": 30,
+    "best_per_threshold": 0.2,
+    "agreement_phoneme": 0.6,
+    "agreement_whisper": 0.7,
+    "agreement_both_must_pass": 0.567,
+    "agreement_either_passes": 0.733,
+    "precision_vs_examiner": 1.0,
+    "recall_vs_examiner": 0.2,
+    "median_per_examiner_correct": 1.0,
+    "median_per_examiner_incorrect": 1.0
+   },
+   "S": {
+    "n": 30,
+    "best_per_threshold": 0.5,
+    "agreement_phoneme": 0.833,
+    "agreement_whisper": 0.767,
+    "agreement_both_must_pass": 0.767,
+    "agreement_either_passes": 0.833,
+    "precision_vs_examiner": 1.0,
+    "recall_vs_examiner": 0.667,
+    "median_per_examiner_correct": 0.35,
+    "median_per_examiner_incorrect": 1.0
+   }
+  },
+  "note": "PER = accent-tolerant phoneme error rate vs dictionary pronunciation; threshold chosen per level on this sample (optimistic by construction), reported alongside Whisper on the same clips."
  },
  "sentence_wpm_examiner_correct": {
   "n": 15,
@@ -85,7 +139,7 @@
   {
    "level": "CL",
    "expected": "N",
-   "transcript": "3, 2, 1.",
+   "transcript": "I",
    "examiner_correct": false,
    "whisper_correct": false
   },
@@ -134,7 +188,7 @@
   {
    "level": "SL",
    "expected": "g",
-   "transcript": "I",
+   "transcript": "E",
    "examiner_correct": false,
    "whisper_correct": false
   },
@@ -183,7 +237,7 @@
   {
    "level": "W",
    "expected": "pen",
-   "transcript": "You, we, see, watch.",
+   "transcript": "You, me, see, watch.",
    "examiner_correct": false,
    "whisper_correct": false
   },
@@ -211,7 +265,7 @@
   {
    "level": "S",
    "expected": "Where is your house?",
-   "transcript": "Why are you laughing? What is it? Please read the number, we have to go to the airport. Where? In the airport. I'm going to the airport. Okay.",
+   "transcript": "We would like to know about the Thank you so much.",
    "examiner_correct": false,
    "whisper_correct": false
   },
@@ -231,5 +285,5 @@
   }
  ],
  "interpretation": "Agreement is expected to be high for sentences and words and low for isolated letters, where general-purpose ASR is unreliable. Lexora therefore keeps ASER's examiner-marking mode as the primary scoring path for the reading ladder and treats Whisper's letter judgement as advisory.",
- "runtime_seconds": 1316.0
+ "runtime_seconds": 845.8
 }

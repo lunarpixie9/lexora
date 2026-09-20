@@ -26,6 +26,12 @@ LETTER_NAMES = {
     "x": {"x", "ex", "eks"}, "y": {"y", "why", "wai"}, "z": {"z", "zed", "zee", "jed", "said"},
 }
 LONG_PAUSE_SECONDS = 0.5
+# Phoneme-error-rate thresholds per ladder level below which the pronunciation layer
+# counts an item as read correctly. Chosen on the 120-clip ASER validation sample
+# (data/metadata/validation_speech_aser.json, phoneme_layer) - optimistic by
+# construction, so they are only used to *rescue* items Whisper rejected, which
+# raised agreement with examiners at every level on that sample.
+PHONEME_PASS_THRESHOLD = {"CL": 0.5, "SL": 0.3, "W": 0.2, "S": 0.5}
 
 
 def item_is_correct(expected: str, transcript_text: str, level: str) -> bool:
@@ -72,7 +78,8 @@ def _energy_pauses(samples: np.ndarray, sr: int) -> dict:
     }
 
 
-def speech_features(wav_path: str, transcript: Transcript, expected_text: str, level: str) -> dict:
+def speech_features(wav_path: str, transcript: Transcript, expected_text: str, level: str,
+                    pronunciation_model: str | None = None) -> dict:
     samples, sr = load_audio(wav_path)
     duration = len(samples) / sr
     pauses = _energy_pauses(samples, sr)
@@ -94,6 +101,10 @@ def speech_features(wav_path: str, transcript: Transcript, expected_text: str, l
         gaps = [b.start - a.end for a, b in zip(transcript.words, transcript.words[1:])]
         feats["word_gap_pauses"] = sum(1 for g in gaps if g >= LONG_PAUSE_SECONDS)
         feats["mean_word_confidence"] = round(float(np.mean([w.probability for w in transcript.words])), 3)
+        # Per-word confidence lets the report flag words the recogniser was unsure
+        # about, so a teacher knows where to listen before trusting the transcript.
+        feats["words"] = [{"text": w.text, "start": round(w.start, 2), "end": round(w.end, 2),
+                           "confidence": round(w.probability, 3)} for w in transcript.words]
 
     # Word-level comparison only makes sense for words and longer
     if level not in ("CL", "SL"):
@@ -113,4 +124,15 @@ def speech_features(wav_path: str, transcript: Transcript, expected_text: str, l
         if span > 0 and got_tokens:
             feats["words_per_minute"] = round(len(got_tokens) / span * 60, 1)
             feats["long_pauses_per_10_words"] = round(pauses["long_pauses"] / max(len(got_tokens), 1) * 10, 2)
+    # Independent phoneme-level listener (no language model): what sounds were produced?
+    if pronunciation_model:
+        from .pronunciation import analyse_pronunciation
+
+        pron = analyse_pronunciation(samples, sr, expected_text, level, pronunciation_model)
+        if pron is not None:
+            feats["pronunciation"] = pron
+            thr = PHONEME_PASS_THRESHOLD.get(level)
+            if thr is not None and pron.get("scored") and not feats["item_correct"]                     and pron["phoneme_error_rate"] <= thr:
+                feats["item_correct"] = True
+                feats["item_correct_source"] = "phoneme layer (Whisper rejected, sounds matched)"
     return feats

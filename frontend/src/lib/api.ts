@@ -1,5 +1,5 @@
 import type {
-  Activity, AttemptResult, Child, Health, Progress, Report, ScreeningSession, SessionSummary, User,
+  Activity, AttemptResult, Child, Health, Progress, ReadCheck, Report, ScreeningSession, SessionSummary, User,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_URL || ''
@@ -85,6 +85,8 @@ export const api = {
   },
   markItem: (sid: number, tid: number, data: { correct: boolean; mistakes?: number; duration_seconds?: number }) =>
     request<ScreeningSession>(`/api/screenings/${sid}/tasks/${tid}/mark`, { method: 'POST', body: json(data) }),
+  correctTranscript: (sid: number, tid: number, transcript: string) =>
+    request<ScreeningSession>(`/api/screenings/${sid}/tasks/${tid}/transcript`, { method: 'POST', body: json({ transcript }) }),
   demoFill: (sid: number) => request<ScreeningSession>(`/api/screenings/${sid}/demo-fill`, { method: 'POST' }),
   complete: (sid: number) => request<Report>(`/api/screenings/${sid}/complete`, { method: 'POST' }),
   report: (sid: number) => request<Report>(`/api/screenings/${sid}/report`),
@@ -96,6 +98,12 @@ export const api = {
   submitAttempt: (id: number, answers: Record<string, unknown>) =>
     request<AttemptResult>(`/api/practice/${id}/attempts`, { method: 'POST', body: json({ answers }) }),
   skills: () => request<Record<string, string>>('/api/practice/skills'),
+  readCheck: (id: number, index: number, blob: Blob, filename: string) => {
+    const fd = new FormData()
+    fd.append('index', String(index))
+    fd.append('file', blob, filename)
+    return request<ReadCheck>(`/api/practice/${id}/read-check`, { method: 'POST', body: fd })
+  },
 
   progress: (child_id: number) => request<Progress>(`/api/progress/${child_id}`),
 }

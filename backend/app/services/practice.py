@@ -48,6 +48,7 @@ SKILL_LABELS = {
     "complete_spelling": "Writing every letter",
     "sight_words": "Sight words",
     "reading_fluency": "Reading smoothly",
+    "clear_sounds": "Saying every sound",
 }
 STORY_TEMPLATES = [
     ("The {w1} and the {w2}",
@@ -124,7 +125,8 @@ class DeterministicGenerator:
     def generate(self, child: dict, profile: dict, seed: int) -> list[ActivityContent]:
         rng = random.Random(seed)
         skills = profile.get("target_skills") or ["reading_fluency"]
-        missed_words = [w for w in profile.get("words_missed", []) if w.isalpha()]
+        # practice targets: alphabetic content words; one- and two-letter function words are not useful drills
+        missed_words = [w for w in profile.get("words_missed", []) if w.isalpha() and len(w) >= 3]
         pool = missed_words[:]
         for fam, words in WORD_FAMILIES.items():
             if any(w.endswith(fam) for w in missed_words):
@@ -136,9 +138,17 @@ class DeterministicGenerator:
         # 1. word choice - pick the correct spelling (targets orientation/spelling patterns)
         items = []
         for w in rng.sample(pool, min(6, len(pool))):
-            opts = _distractors(w, rng, profile) + [w]
+            distractors = _distractors(w, rng, profile)
+            if not distractors:  # one-letter words ("a", "i") have no plausible wrong spellings
+                continue
+            opts = distractors + [w]
             rng.shuffle(opts)
             items.append(WordChoiceItem(prompt=w, options=opts, answer=w))
+        if not items:
+            for w in rng.sample(ASER_WORDS, 6):
+                opts = _distractors(w, rng, profile) + [w]
+                rng.shuffle(opts)
+                items.append(WordChoiceItem(prompt=w, options=opts, answer=w))
         acts.append(ActivityContent(
             kind="word_practice", title="Spot the right word",
             instructions="Listen to the word, then tap the spelling that is correct.",
@@ -163,7 +173,8 @@ class DeterministicGenerator:
         acts.append(ActivityContent(
             kind="reading", title="Read it out loud",
             instructions="Read each sentence aloud. Tap 'I read it' when you finish a line.",
-            target_skills=["reading_fluency"], reading=[ReadingItem(sentence=s) for s in sentences[:6]]))
+            target_skills=["reading_fluency"] + (["clear_sounds"] if "clear_sounds" in skills else []),
+            reading=[ReadingItem(sentence=s) for s in sentences[:6]]))
 
         # 4. short story + comprehension
         nouns = [w for w in pool if w in CHARACTERS]

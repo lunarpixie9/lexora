@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from .aser_features import LEVEL_DISPLAY
 
-INDICATOR_VERSION = "lexora-indicator-1.0"
+INDICATOR_VERSION = "lexora-indicator-1.1"
 
 BANDS = [
     (0.25, "few_signals", "Few literacy signals observed"),
@@ -91,18 +91,25 @@ def build_signals(reading: dict | None, writing: dict | None, speech: dict | Non
 
     # --- Speech / oral passage reading ---
     if speech and speech.get("expected_words"):
-        sig.append(Signal("passage_mismatch", "Passage reading mismatch", "speech", 0.10,
+        sig.append(Signal("passage_mismatch", "Passage reading mismatch", "speech", 0.08,
                           _clamp(speech.get("word_error_rate", 0)),
                           f"{speech.get('word_error_rate', 0):.0%} word error rate",
                           f"Transcribed by {speech.get('engine', 'unknown')}"))
+        pron = speech.get("pronunciation") or {}
+        if pron.get("scored"):
+            n_flag = len(pron.get("flagged_words", []))
+            sig.append(Signal("pronunciation", "Sounds not matching the words", "speech", 0.07,
+                              _clamp(pron.get("phoneme_error_rate", 0)),
+                              f"{pron.get('phoneme_error_rate', 0):.0%} phoneme mismatch, {n_flag} word{'s' if n_flag != 1 else ''} flagged",
+                              "Phoneme recogniser (no language model), accent-tolerant comparison with dictionary pronunciations"))
         wpm, ref = speech.get("words_per_minute"), speech.get("wpm_reference") or 60.0
         if wpm is not None:
-            sig.append(Signal("reading_rate", "Reading rate below class reference", "speech", 0.05,
+            sig.append(Signal("reading_rate", "Reading rate below class reference", "speech", 0.03,
                               _clamp(1 - wpm / ref), f"{wpm:.0f} wpm vs. {ref:.0f} wpm reference",
                               "Reference: median rate of correctly read ASER sentences for this class"))
         pauses = speech.get("long_pauses_per_10_words")
         if pauses is not None:
-            sig.append(Signal("pauses", "Long pauses while reading", "speech", 0.05,
+            sig.append(Signal("pauses", "Long pauses while reading", "speech", 0.02,
                               _clamp(pauses / 3), f"{pauses:.1f} pauses >0.5 s per 10 words"))
     return sig
 

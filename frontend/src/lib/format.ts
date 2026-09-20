@@ -54,6 +54,7 @@ export const SKILL_LABEL: Record<string, string> = {
   complete_spelling: 'Writing every letter',
   sight_words: 'Sight words',
   reading_fluency: 'Reading smoothly',
+  clear_sounds: 'Saying every sound',
 }
 
 // Chart marks use darker, validated variants of the brand hues (dataviz validator:
@@ -81,3 +82,10 @@ export const speak = (text: string) => {
   window.speechSynthesis.speak(u)
   return true
 }
+
+// Readable rendering of the pronunciation layer's phoneme classes (see backend lexora_speech/pronunciation.py)
+const PHONE_SYMBOL: Record<string, string> = {
+  S: 'ʃ', tS: 'tʃ', dZ: 'dʒ', T: 'θ', D: 'ð', N: 'ŋ', Z: 'ʒ', I: 'i', E: 'e', A: 'a', O: 'ɔ', U: 'u', R: 'ə',
+  AY: 'aɪ', AW: 'aʊ', OY: 'ɔɪ', EY: 'eɪ', OW: 'oʊ', j: 'y',
+}
+export const phones = (classes: string) => classes.split(' ').filter(Boolean).map((c) => PHONE_SYMBOL[c] ?? c).join('')

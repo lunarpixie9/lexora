@@ -101,6 +101,10 @@ class TextResponseIn(BaseModel):
     response_text: str = Field(max_length=2000)
 
 
+class TranscriptCorrectionIn(BaseModel):
+    transcript: str = Field(min_length=1, max_length=2000)
+
+
 class ExaminerMarkIn(BaseModel):
     correct: bool
     mistakes: int = Field(default=0, ge=0, le=50)

@@ -100,7 +100,7 @@ Produced by `scripts/validation/*.py` and `backend/lexora_ml/*.py`; served by th
 |---|---|---|---|
 | `metadata/validation_nlp_misspellings.json` | spelling-error engine | Birkbeck (5,000-pair sample) + Holbrook | 100% detection, ≥99% pattern coverage, 0 false positives |
 | `metadata/validation_aser_reading_level.json` | reading-level model (XGBoost + SHAP) + class norms + WPM reference | ASER, 4,908 sessions | held-out accuracy 0.888, macro-F1 0.877 |
-| `metadata/validation_speech_aser.json` | Whisper transcription + item scoring | 120 ASER clips (30 per level, balanced) | agreement with examiner 67–80%; letters weakest |
+| `metadata/validation_speech_aser.json` | Whisper transcription + item scoring; phoneme pronunciation layer | 120 ASER clips (30 per level, balanced) | Whisper agreement 67–80%; phoneme layer 83% on sentences (vs 77%), weaker on single words; "either passes" ≥ Whisper at every level |
 | `metadata/validation_speech_nnces_pilot.json` | prompt-free speech measures | 40 NNCES pilot files | 0 empty transcripts, median word confidence 0.86 — **no prompt text exists; none was reconstructed** |
 | `metadata/validation_rello_xgboost_shap.json` | XGBoost + SHAP method (separate experiment) | Rello desktop + tablet | CV ROC-AUC 0.855; poor desktop→tablet transfer, reported as-is |
 

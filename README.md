@@ -18,7 +18,8 @@ no credit card.
 Teacher/parent login → child profile → screening
    reading ladder (ASER letters → words → sentences, examiner-marked; Whisper advisory, teacher can re-mark)
    writing dictation (typed; deterministic error-pattern analysis)
-   speech passage (recorded; local Whisper transcription + fluency features)
+   speech passage (recorded; local Whisper transcription + fluency features
+                   + a phoneme recogniser that flags mispronounced words Whisper would "repair")
 → ASER-trained reading-level model (XGBoost + SHAP)
 → additive screening indicator with exact per-signal contributions
 → explainable report → personalised practice (word / spelling / reading / story)
@@ -48,8 +49,10 @@ page (password `lexora123`): `teacher@lexora.demo`, `parent@lexora.demo`,
 practice history; *Rohan* is an empty-state example.
 
 The first recording you submit downloads the Whisper `small` model (~460 MB)
-once; if that is not possible, the server falls back to a clearly labelled demo
-transcriber and everything else keeps working. A teacher can also press **Fill
+and the phoneme model (~1.2 GB) once; if that is not possible, the server falls
+back to a clearly labelled demo transcriber (and skips pronunciation flags) and
+everything else keeps working. On a laptop with little free RAM set
+`PRONUNCIATION_MODEL=` in `backend/.env`. A teacher can also press **Fill
 with demo answers** during a screening to present the full flow without a
 microphone.
 
@@ -65,7 +68,7 @@ backend/
   lexora_nlp/     deterministic text analysis (alignment, error patterns, phonetics)
   lexora_speech/  ffmpeg conversion, faster-whisper transcription, fluency features
   lexora_ml/      ASER reading-level model, composite indicator, Rello validation
-  tests/          pytest suite (21 tests, no Whisper needed)
+  tests/          pytest suite (26 tests, no models needed)
 frontend/         React + TypeScript + Vite + Tailwind
 data/             datasets (raw/processed are gitignored), metadata & validation JSON
 docs/             PROJECT_SPEC.md (governing spec), DATASET_RESEARCH.md, ARCHITECTURE.md, SETUP.md
@@ -101,5 +104,6 @@ python scripts/validation/validate_speech_aser.py --per-level 30   # needs Whisp
 No dataset gives dyslexia labels for Indian children's English, so the
 indicator is a transparent composite of observed signals, not a validated
 classifier. Whisper is unreliable on isolated letters (examiner marking stays
-primary). NNCES has no prompts. The demo child's data is generated. See
+primary) and auto-corrects mispronunciations (the phoneme layer and teacher
+transcript correction exist for that). NNCES has no prompts. The demo child's data is generated. See
 `docs/ARCHITECTURE.md` for the full list.

@@ -19,6 +19,8 @@ class Settings(BaseSettings):
 
     whisper_model: str = "small"
     whisper_device: str = "cpu"
+    # Phoneme recogniser for the pronunciation layer; empty string disables it
+    pronunciation_model: str = "facebook/wav2vec2-xlsr-53-espeak-cv-ft"
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.0-flash"
