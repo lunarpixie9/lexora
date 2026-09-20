@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from lexora_speech import get_transcriber, speech_features  # noqa: E402
+from lexora_speech import get_transcriber, item_is_correct, speech_features  # noqa: E402
 from lexora_speech.pronunciation import DEFAULT_MODEL  # noqa: E402
 from lexora_speech.audio import ffmpeg_exe  # noqa: E402
 
@@ -88,10 +88,11 @@ def main():
             t = tr.transcribe(str(wav), r["que_text"])
             f = speech_features(str(wav), t, r["que_text"], r["level"], pronunciation_model=args.pronunciation_model or None)
             pron = f.get("pronunciation") or {}
+            # Whisper's own judgement, before the phoneme-layer rescue that speech_features applies
+            whisper = item_is_correct(r["que_text"], t.text, r["level"])
             if pron.get("scored"):
-                pron_rows.append((r["level"], r["isCorrect"] == "True", pron["phoneme_error_rate"], f["item_correct"]))
+                pron_rows.append((r["level"], r["isCorrect"] == "True", pron["phoneme_error_rate"], whisper))
             examiner = r["isCorrect"] == "True"
-            whisper = f["item_correct"]
             st = per_level[r["level"]]
             st["n"] += 1
             st["agree"] += examiner == whisper

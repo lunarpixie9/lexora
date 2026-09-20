@@ -5,7 +5,7 @@ import { api, ApiError } from '../lib/api'
 import { LADDER_LABEL } from '../lib/format'
 import type { ScreeningSession, Task } from '../lib/types'
 import { RecorderControl, SpeakButton, useRecorder } from './Recorder'
-import { Disclaimer, ErrorBox, ProgressBar, Spinner } from './ui'
+import { Disclaimer, ErrorBox, ListeningStatus, ProgressBar, Spinner } from './ui'
 
 type Mode = 'teacher' | 'child'
 
@@ -260,7 +260,7 @@ function TaskCard({ task, mode, busy, session, onText, onAudio, onMark }: {
             ) : (
               <div className="mt-8 flex flex-col items-center gap-4">
                 {busy ? (
-                  <div className="flex flex-col items-center gap-2 py-4 text-navy-500" aria-live="polite"><Loader2 className="h-8 w-8 animate-spin text-teal-500" aria-hidden /><span className="text-sm font-bold">{busy}</span></div>
+                  <ListeningStatus label={busy} />
                 ) : (
                   <>
                     <RecorderControl rec={rec} big label="Record" />

@@ -123,7 +123,7 @@ export default function ReportView({ report, practiceHref, onRemark, onCorrectTr
                       <li key={it.task_id ?? it.prompt} className="flex items-center justify-between gap-2 rounded-lg bg-cream-100 px-2 py-1.5 text-xs">
                         <span className="min-w-0 flex-1">
                           <span className="font-display text-base font-bold">{it.prompt}</span>
-                          <span className="ml-2 text-navy-500">{it.engine === 'examiner' ? 'examiner' : it.engine ?? '—'}{it.transcript ? ` · heard “${it.transcript}”` : ''}{it.pronunciation_flagged === true && ' · sounds differ'}{it.pronunciation_flagged === false && ' · sounds match'}</span>
+                          <span className="ml-2 text-navy-500">{it.engine === 'examiner' ? 'examiner' : it.engine ?? '—'}{it.transcript ? ` · heard “${it.transcript}”` : ''}{!['CL', 'SL'].includes(it.level) && it.pronunciation_flagged === true && ' · sounds differ'}{!['CL', 'SL'].includes(it.level) && it.pronunciation_flagged === false && ' · sounds match'}</span>
                         </span>
                         <span className={`badge ${it.correct ? 'bg-teal-100 text-teal-700' : it.correct === false ? 'bg-coral-100 text-coral-500' : 'bg-cream-200'}`}>{it.correct ? 'correct' : it.correct === false ? 'incorrect' : 'unjudged'}</span>
                         {it.task_id !== undefined && (

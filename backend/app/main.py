@@ -33,7 +33,21 @@ async def lifespan(app: FastAPI):
     if settings.secret_key == DEV_SECRET:
         log.warning("SECRET_KEY is the built-in development value - set a random one in backend/.env before exposing the server")
     log.info("database: %s", settings.resolved_database_url.split("://")[0])
-    log.info("whisper model: %s (loads lazily on first recording)", settings.whisper_model or "disabled")
+    if settings.preload_models and (settings.whisper_model or settings.pronunciation_model):
+        import threading
+
+        def _warm_up():
+            from lexora_speech import get_phoneme_recognizer, get_transcriber
+
+            get_transcriber(settings.whisper_model, settings.whisper_device)
+            get_phoneme_recognizer(settings.pronunciation_model or None)
+            log.info("speech models ready")
+
+        threading.Thread(target=_warm_up, name="model-warmup", daemon=True).start()
+        log.info("loading speech models in the background (whisper=%s, pronunciation=%s)",
+                 settings.whisper_model or "off", "on" if settings.pronunciation_model else "off")
+    else:
+        log.info("whisper model: %s (loads lazily on first recording)", settings.whisper_model or "disabled")
     yield
 
 

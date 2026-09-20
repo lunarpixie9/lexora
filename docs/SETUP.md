@@ -34,7 +34,8 @@ python -m uvicorn app.main:app --reload --port 8000
 | `STORAGE_DIR` | `./storage` | recordings and converted audio (local storage backend; gitignored) |
 | `WHISPER_MODEL` | `small` | faster-whisper size: `tiny`/`base`/`small`/`medium`. Empty string disables Whisper (demo transcriber) |
 | `WHISPER_DEVICE` | `cpu` | `cuda` if you have a GPU with CTranslate2 support |
-| `PRONUNCIATION_MODEL` | `facebook/wav2vec2-xlsr-53-espeak-cv-ft` | phoneme recogniser for the pronunciation layer (downloads ~1.2 GB once, ~1.5 GB RAM). Empty string disables it; the app then simply omits pronunciation flags |
+| `PRONUNCIATION_MODEL` | `facebook/wav2vec2-xlsr-53-espeak-cv-ft` | phoneme recogniser for the pronunciation layer (downloads ~1.2 GB once, ~1 GB RAM quantised). Empty string disables it; the app then simply omits pronunciation flags |
+| `PRELOAD_MODELS` | `true` | load the speech models in the background at startup; `false` defers loading to the first recording |
 | `GEMINI_API_KEY` | empty | optional Google Gemini free-tier key for AI-generated practice; leave empty to use the local deterministic generator |
 | `GEMINI_MODEL` | `gemini-2.0-flash` | |
 | `SEED_DEMO` | `true` | seed demo accounts/children on first start |
@@ -52,7 +53,7 @@ Never commit `.env`; it is gitignored. Secrets are never sent to the frontend.
 
 ### Pronunciation layer (phoneme recogniser)
 
-Loads on the first recording together with Whisper. Memory budget on a laptop: Whisper `small` ≈ 0.5 GB + phoneme model ≈ 1.5 GB + servers. With less than ~3 GB free, set `PRONUNCIATION_MODEL=` (or `WHISPER_MODEL=base`) before a demo. Requires `torch` (CPU build is enough) and `transformers` from `requirements.txt`.
+With `PRELOAD_MODELS=true` (default) both speech models load in a background thread right after startup (`/api/health` shows `loaded` when done; ~40 s on this laptop once the weights are cached), so the first recording is not delayed. Measured backend memory: **≈2.6 GB** with Whisper `small` + the int8 phoneme model, ≈1.5 GB with `PRONUNCIATION_MODEL=`, ≈1 GB with both disabled. With less than ~3 GB free, set `PRONUNCIATION_MODEL=` (or `WHISPER_MODEL=base`) before a demo, and close memory-heavy apps. Requires `torch` (CPU build is enough) and `transformers` from `requirements.txt`.
 
 ### MySQL (the spec's target database)
 

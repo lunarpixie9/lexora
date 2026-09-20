@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     whisper_device: str = "cpu"
     # Phoneme recogniser for the pronunciation layer; empty string disables it
     pronunciation_model: str = "facebook/wav2vec2-xlsr-53-espeak-cv-ft"
+    # Load the speech models in a background thread at startup so the first recording
+    # is not delayed by 30 s+ of model loading (set false to save memory until needed)
+    preload_models: bool = True
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.0-flash"

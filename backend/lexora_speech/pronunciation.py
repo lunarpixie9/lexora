@@ -220,7 +220,12 @@ class PhonemeRecognizer:
         self._fe = Wav2Vec2FeatureExtractor.from_pretrained(model_name)
         model = Wav2Vec2ForCTC.from_pretrained(model_name).eval()
         if quantize:
-            model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+            # in place: the default makes a quantised copy and leaves the fp32 weights
+            # resident (~2.7 GB total instead of ~1.0 GB)
+            model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8, inplace=True)
+        import gc
+
+        gc.collect()
         self._model = model
         vocab = json.loads(open(hf_hub_download(model_name, "vocab.json"), encoding="utf-8").read())
         self._id2tok = {v: k for k, v in vocab.items()}
