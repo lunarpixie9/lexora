@@ -65,3 +65,52 @@ def test_practice_generator_survives_one_letter_missed_words():
                                              {"target_skills": ["clear_sounds"], "words_missed": ["i", "a", "is"], "patterns": {}}, seed=1)
     word_choice = next(a for a in acts if a.kind == "word_practice")
     assert word_choice.word_choice and all(len(i.options) >= 2 for i in word_choice.word_choice)
+
+
+def _gemini_payload(**over):
+    data = {
+        "title": "The cat and the bus",
+        "story": "A cat sat near the bus. The sun was hot. A boy gave it water. The cat ran home. It was a good day.",
+        "questions": [
+            {"question": "Where did the cat sit?", "options": ["near the bus", "in a box", "on a mat"], "answer": "near the bus"},
+            {"question": "Who gave water?", "options": ["a boy", "a man", "a hen"], "answer": "a boy"},
+        ],
+        "sentences": ["The cat is here.", "I see the bus.", "The sun is hot.", "A boy ran fast.", "We go home.", "The cat is wet."],
+    }
+    data.update(over)
+    return data
+
+
+def test_gemini_output_is_validated_before_use():
+    import pytest
+
+    from app.services.practice import GeminiGenerator
+
+    g = GeminiGenerator("key", "model")
+    profile = {"target_skills": ["sight_words"]}
+    story, reading = g._build(_gemini_payload(), profile, ["cat", "bus"])
+    assert story.kind == "story" and len(story.questions) == 2
+    assert reading.kind == "reading" and 4 <= len(reading.reading) <= 6
+
+    # a wrong answer, an over-long sentence, or ignoring the child's words is rejected
+    bad_answer = _gemini_payload(questions=[{"question": "q", "options": ["a", "b"], "answer": "c"},
+                                            {"question": "q2", "options": ["a", "b"], "answer": "a"}])
+    with pytest.raises(ValueError):
+        g._build(bad_answer, profile, ["cat"])
+    long_sentence = _gemini_payload(sentences=["This sentence has far too many words for a small child to read."] * 6)
+    with pytest.raises(ValueError):
+        g._build(long_sentence, profile, ["cat"])
+    with pytest.raises(ValueError):
+        g._build(_gemini_payload(), profile, ["zebra"])  # none of the target words appear
+
+
+def test_generate_activities_falls_back_when_gemini_fails(monkeypatch):
+    from app.services import practice as mod
+
+    monkeypatch.setattr(mod.get_settings(), "gemini_api_key", "fake-key", raising=False)
+    monkeypatch.setattr(mod.GeminiGenerator, "story_and_reading",
+                        lambda *a, **k: (_ for _ in ()).throw(ValueError("boom")))
+    generated = mod.generate_activities({"age": 8, "class_grade": 3},
+                                        {"target_skills": ["sight_words"], "words_missed": ["cat"], "patterns": {}}, seed=5)
+    assert {src for _, src in generated} == {"deterministic"}
+    assert {a.kind for a, _ in generated} == {"word_practice", "spelling", "reading", "story"}

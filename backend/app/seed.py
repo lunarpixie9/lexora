@@ -55,8 +55,9 @@ def _demo_screening(db: Session, child: Child, teacher: User, days_ago: int, sev
 
 def _demo_practice(db: Session, child: Child, session: ScreeningSession, days_ago: int, rng: random.Random) -> None:
     profile = session.risk_score.explanation["error_profile"]
-    acts, source = generate_activities({"age": child.age, "class_grade": child.class_grade}, profile, seed=child.id * 1000 + session.id)
-    for i, a in enumerate(acts):
+    generated = generate_activities({"age": child.age, "class_grade": child.class_grade}, profile,
+                                    seed=child.id * 1000 + session.id)
+    for i, (a, source) in enumerate(generated):
         row = PracticeActivity(child_id=child.id, session_id=session.id, kind=a.kind, title=a.title,
                                target_skills=a.target_skills, content=a.model_dump(), source=source,
                                created_at=datetime.utcnow() - timedelta(days=days_ago))

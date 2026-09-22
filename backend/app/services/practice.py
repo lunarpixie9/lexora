@@ -12,8 +12,10 @@ Neither generator ever refers to diagnosis; prompts and templates use
 """
 from __future__ import annotations
 
+import json
 import logging
 import random
+import time
 from typing import Any, Literal
 
 import httpx
@@ -197,53 +199,159 @@ class DeterministicGenerator:
 
 
 class GeminiGenerator:
+    """Story and read-aloud sentences from Google's free-tier Gemini.
+
+    Deliberately NOT used for word-choice or spelling drills: those must be built
+    from the child's exact error patterns (mirror letters, phonics families,
+    dictionary-correct answers), which the deterministic generator does reliably
+    and an LLM does not. Gemini supplies what it is genuinely better at - a fresh,
+    age-appropriate little story and sentences that reuse the child's hard words.
+
+    Every response is validated before use: schema, banned clinical language,
+    sentence length, word length, and that the child's target words actually
+    appear. Any failure falls back to the deterministic generator.
+    """
+
     source = "gemini"
+    MAX_WORD_LETTERS = 8
+    MAX_SENTENCE_WORDS = 8
 
-    def __init__(self, api_key: str, model: str):
-        self.api_key, self.model = api_key, model
+    def __init__(self, api_key: str, model: str, timeout: float = 45.0):
+        self.api_key, self.model, self.timeout = api_key, model, timeout
 
-    def generate(self, child: dict, profile: dict, seed: int) -> list[ActivityContent]:
-        schema_hint = ActivityContent.model_json_schema()
-        prompt = (
-            "You create short English literacy PRACTICE activities for a child in India, age "
-            f"{child['age']}, school class {child['class_grade']}. Observed patterns to practise: "
-            f"{', '.join(SKILL_LABELS.get(s, s) for s in profile.get('target_skills', []))}. "
-            f"Words the child found hard: {', '.join(profile.get('words_missed', [])[:10]) or 'none'}. "
-            "Use simple, common words (3-5 letters where possible), warm encouraging tone, Indian everyday context. "
-            "Never mention dyslexia, diagnosis, disability or medical terms. Return a JSON array of exactly 4 objects "
-            "with kinds word_practice, spelling, reading, story, each matching this JSON schema: "
-            + str(schema_hint)
-        )
+    def _call(self, prompt: str, schema: dict) -> dict:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
-        body = {"contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"responseMimeType": "application/json", "temperature": 0.7}}
-        resp = httpx.post(url, params={"key": self.api_key}, json=body, timeout=30)
-        resp.raise_for_status()
-        text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-        import json
+        body = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json", "responseSchema": schema,
+                "temperature": 0.8,
+                # Current flash models "think" by default: the reasoning tokens eat the
+                # output budget (truncated JSON) and push latency past a minute. This
+                # task needs no reasoning, so thinking is switched off and the budget
+                # is generous enough for the whole story.
+                "thinkingConfig": {"thinkingBudget": 0},
+                "maxOutputTokens": 2000,
+            },
+        }
+        last: Exception | None = None
+        for attempt in range(3):  # the free tier returns 503 "high demand" fairly often
+            try:
+                resp = httpx.post(url, params={"key": self.api_key}, json=body, timeout=self.timeout)
+                if resp.status_code in (429, 500, 503) and attempt < 2:
+                    last = httpx.HTTPStatusError(f"HTTP {resp.status_code}", request=resp.request, response=resp)
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                resp.raise_for_status()
+                parts = resp.json()["candidates"][0]["content"]["parts"]
+                text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                return json.loads(text)
+            except (httpx.HTTPError, KeyError, IndexError, json.JSONDecodeError) as exc:
+                last = exc
+                if attempt < 2:
+                    time.sleep(1.0)
+        raise last or RuntimeError("Gemini call failed")
 
-        data = json.loads(text)
-        acts = [ActivityContent.model_validate(a) for a in data]
-        banned = ("dyslexi", "diagnos", "disorder", "disabilit")
-        for a in acts:
-            blob = a.model_dump_json().lower()
-            if any(b in blob for b in banned):
-                raise ValueError("generated content used clinical language")
-        if {a.kind for a in acts} != {"word_practice", "spelling", "reading", "story"}:
-            raise ValueError("generated content missing an activity kind")
-        return acts
+    def _check_language(self, blob: str) -> None:
+        banned = ("dyslexi", "diagnos", "disorder", "disabilit", "special need")
+        if any(b in blob.lower() for b in banned):
+            raise ValueError("generated content used clinical language")
+
+    def story_and_reading(self, child: dict, profile: dict,
+                          words: list[str]) -> tuple[ActivityContent, ActivityContent]:
+        targets = [w for w in words if w.isalpha()][:6] or ["cat", "dog", "sun"]
+        skills = ", ".join(SKILL_LABELS.get(s, s) for s in profile.get("target_skills", [])) or "reading smoothly"
+        prompt = (
+            f"Write English reading practice for a child of age {child['age']} in school class "
+            f"{child['class_grade']} in India who is practising: {skills}.\n"
+            f"Use these words the child found hard, spelled exactly like this: {', '.join(targets)}.\n"
+            "Rules: very simple everyday words (at most 8 letters); sentences of at most 8 words; "
+            "a warm, encouraging tone; familiar Indian everyday settings (home, school, market, garden); "
+            "no rare or abstract words; no brand or people names; never mention reading difficulty, "
+            "dyslexia, diagnosis or anything medical.\n"
+            "Return JSON with: title (3-6 words), story (5-7 short sentences using several of those words), "
+            "questions (exactly 2, each with question, three short options, and answer copied exactly from "
+            "the options), sentences (6 short sentences for reading aloud, each using at least one of those words)."
+        )
+        schema = {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "story": {"type": "string"},
+                "questions": {"type": "array", "items": {"type": "object", "properties": {
+                    "question": {"type": "string"},
+                    "options": {"type": "array", "items": {"type": "string"}},
+                    "answer": {"type": "string"}}, "required": ["question", "options", "answer"]}},
+                "sentences": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["title", "story", "questions", "sentences"],
+        }
+        data = self._call(prompt, schema)
+        self._check_language(json.dumps(data))
+        return self._build(data, profile, targets)
+
+    def _build(self, data: dict, profile: dict, targets: list[str]) -> tuple[ActivityContent, ActivityContent]:
+        story_text = " ".join(str(data["story"]).split())
+        sentences = [" ".join(str(x).split()) for x in data["sentences"] if str(x).strip()][:6]
+        if len(sentences) < 4 or not (30 <= len(story_text) <= 700):
+            raise ValueError("generated story or sentences were the wrong size")
+        for text in [story_text, *sentences]:
+            for w in normalize_text(text).split():
+                if len(w) > self.MAX_WORD_LETTERS:
+                    raise ValueError(f"generated text used a hard word: {w}")
+        for sentence in sentences:
+            if len(sentence.split()) > self.MAX_SENTENCE_WORDS:
+                raise ValueError("generated sentence too long for a beginning reader")
+        used = set(normalize_text(story_text).split()) | {w for s in sentences for w in normalize_text(s).split()}
+        if not used & set(targets):
+            raise ValueError("generated text ignored the child's practice words")
+
+        questions = []
+        for q in data["questions"][:2]:
+            options = [str(o).strip() for o in q["options"] if str(o).strip()][:3]
+            answer = str(q["answer"]).strip()
+            if len(options) < 2 or answer not in options:
+                raise ValueError("generated question had no valid answer among its options")
+            questions.append(StoryQuestion(question=str(q["question"]).strip(), options=options, answer=answer))
+        if len(questions) < 2:
+            raise ValueError("generated story needs two questions")
+
+        story = ActivityContent(
+            kind="story", title=str(data["title"]).strip()[:160] or "Story time",
+            instructions="Read the story, then answer two questions.",
+            target_skills=["reading_fluency", "sight_words"], story_text=story_text, questions=questions)
+        reading = ActivityContent(
+            kind="reading", title="Read it out loud",
+            instructions="Read each sentence aloud. Tap 'I read it', or record yourself to check your sounds.",
+            target_skills=["reading_fluency"] + (["clear_sounds"] if "clear_sounds" in profile.get("target_skills", []) else []),
+            reading=[ReadingItem(sentence=x) for x in sentences])
+        return story, reading
 
 
-def generate_activities(child: dict, profile: dict, seed: int) -> tuple[list[ActivityContent], str]:
+def generate_activities(child: dict, profile: dict, seed: int) -> list[tuple[ActivityContent, str]]:
+    """Always returns four activities, each paired with the generator that made it.
+
+    Word-choice and spelling drills always come from the deterministic generator -
+    they depend on the child's exact error patterns and must have correct answers.
+    When a Gemini key is configured, the story and read-aloud sentences come from
+    Gemini instead (fresher and more varied); any failure silently keeps the
+    deterministic versions, so the product never depends on the API.
+    """
     settings = get_settings()
-    if settings.gemini_api_key:
-        try:
-            gen = GeminiGenerator(settings.gemini_api_key, settings.gemini_model)
-            return gen.generate(child, profile, seed), gen.source
-        except (httpx.HTTPError, ValidationError, ValueError, KeyError, IndexError) as exc:
-            log.warning("Gemini generation failed (%s); using deterministic generator", exc)
-    gen = DeterministicGenerator()
-    return gen.generate(child, profile, seed), gen.source
+    acts = DeterministicGenerator().generate(child, profile, seed)
+    out = [(a, DeterministicGenerator.source) for a in acts]
+    if not settings.gemini_api_key:
+        return out
+    try:
+        words = list(profile.get("words_missed") or [])
+        words += [i.word for a in acts if a.kind == "spelling" for i in a.spelling]
+        story, reading = GeminiGenerator(settings.gemini_api_key, settings.gemini_model).story_and_reading(
+            child, profile, words)
+    except (httpx.HTTPError, ValidationError, ValueError, KeyError, IndexError, json.JSONDecodeError) as exc:
+        log.warning("Gemini generation failed (%s); using the deterministic story and sentences", exc)
+        return out
+    keep = [(a, src) for a, src in out if a.kind not in ("story", "reading")]
+    return keep + [(reading, GeminiGenerator.source), (story, GeminiGenerator.source)]
 
 
 def score_attempt(content: dict[str, Any], answers: dict[str, Any]) -> dict:

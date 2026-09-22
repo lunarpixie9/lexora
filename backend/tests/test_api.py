@@ -10,6 +10,7 @@ os.environ["STORAGE_DIR"] = _tmp
 os.environ["WHISPER_MODEL"] = ""  # force the demo transcriber so tests stay fast
 os.environ["PRONUNCIATION_MODEL"] = ""  # never download the phoneme model in tests
 os.environ["PRELOAD_MODELS"] = "false"
+os.environ["GEMINI_API_KEY"] = ""  # tests must never call the live API, key or no key
 os.environ["SEED_DEMO"] = "true"
 
 from fastapi.testclient import TestClient  # noqa: E402

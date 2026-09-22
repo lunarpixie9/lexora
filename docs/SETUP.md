@@ -36,8 +36,8 @@ python -m uvicorn app.main:app --reload --port 8000
 | `WHISPER_DEVICE` | `cpu` | `cuda` if you have a GPU with CTranslate2 support |
 | `PRONUNCIATION_MODEL` | `facebook/wav2vec2-xlsr-53-espeak-cv-ft` | phoneme recogniser for the pronunciation layer (downloads ~1.2 GB once, ~1 GB RAM quantised). Empty string disables it; the app then simply omits pronunciation flags |
 | `PRELOAD_MODELS` | `true` | load the speech models in the background at startup; `false` defers loading to the first recording |
-| `GEMINI_API_KEY` | empty | optional Google Gemini free-tier key for AI-generated practice; leave empty to use the local deterministic generator |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | |
+| `GEMINI_API_KEY` | empty | optional Google Gemini free-tier key (https://aistudio.google.com/apikey). When set, the practice **story and read-aloud sentences** come from Gemini (validated, with automatic fallback); word-choice and spelling drills always stay deterministic |
+| `GEMINI_MODEL` | `gemini-3.6-flash` | any current flash model the key can access; Lexora disables the model's "thinking" mode, which otherwise truncates the JSON and pushes latency past a minute |
 | `SEED_DEMO` | `true` | seed demo accounts/children on first start |
 | `DEMO_PASSWORD` | `lexora123` | password for the demo accounts |
 | `CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | comma-separated allowed origins |
@@ -55,14 +55,26 @@ Never commit `.env`; it is gitignored. Secrets are never sent to the frontend.
 
 With `PRELOAD_MODELS=true` (default) both speech models load in a background thread right after startup (`/api/health` shows `loaded` when done; ~40 s on this laptop once the weights are cached), so the first recording is not delayed. Measured backend memory: **≈2.6 GB** with Whisper `small` + the int8 phoneme model, ≈1.5 GB with `PRONUNCIATION_MODEL=`, ≈1 GB with both disabled. With less than ~3 GB free, set `PRONUNCIATION_MODEL=` (or `WHISPER_MODEL=base`) before a demo, and close memory-heavy apps. Requires `torch` (CPU build is enough) and `transformers` from `requirements.txt`.
 
+### Personalised practice with Gemini (optional)
+
+With `GEMINI_API_KEY` set, the **story and the six read-aloud sentences** are written by Gemini for the individual child; word-choice and spelling drills stay deterministic because they must key off the child's exact error patterns and have provably correct answers. Measured on the free tier: 15-45 s per generation, and `503 high demand` happens often enough that Lexora retries three times and then silently keeps the deterministic story — the UI tells the teacher a story is being written and badges each activity with the generator that made it. Nothing breaks without a key.
+
 ### MySQL (the spec's target database)
 
-```sql
-CREATE DATABASE lexora CHARACTER SET utf8mb4;
-CREATE USER 'lexora'@'localhost' IDENTIFIED BY 'change-me';
-GRANT ALL ON lexora.* TO 'lexora'@'localhost';
+Lexora runs on either database; the schema is written to be valid on both (no unbounded `VARCHAR`, JSON columns, quoted reserved words). SQLite is the zero-setup default so a teammate can clone and run; MySQL is one setting away.
+
+```bash
+# once, with your MySQL root password
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS lexora CHARACTER SET utf8mb4;   CREATE USER IF NOT EXISTS 'lexora'@'localhost' IDENTIFIED BY '<pick-a-password>';   GRANT ALL ON lexora.* TO 'lexora'@'localhost'; FLUSH PRIVILEGES;"
 ```
-Then set `DATABASE_URL=mysql+pymysql://lexora:change-me@localhost:3306/lexora` and restart. `pymysql` is in `requirements.txt`.
+
+Then in `backend/.env`:
+
+```
+DATABASE_URL=mysql+pymysql://lexora:<pick-a-password>@localhost:3306/lexora
+```
+
+Restart the backend — tables are created automatically and the demo data is seeded on first start. `pymysql` is in `requirements.txt`. To go back to SQLite, comment the line out. Note the two databases hold separate data: switching does not migrate existing screenings.
 
 ## 3. Frontend
 
