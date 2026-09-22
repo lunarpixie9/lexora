@@ -5,10 +5,10 @@ import { Disclaimer } from '../components/ui'
 import { useAuth, homeFor } from '../lib/auth'
 
 const STEPS = [
-  { icon: <BookOpen className="h-5 w-5" />, title: 'Reading ladder', body: 'Letters, words and sentences from the real ASER reading assessment, marked the way ASER examiners mark them.' },
-  { icon: <PenLine className="h-5 w-5" />, title: 'Writing', body: 'Short dictation. Every spelling is compared letter by letter to surface reversals, omissions and sound-alike spellings.' },
-  { icon: <Ear className="h-5 w-5" />, title: 'Speech', body: 'A short passage read aloud, transcribed locally with Whisper and compared with the text for rate, pauses and mismatches.' },
-  { icon: <Sparkles className="h-5 w-5" />, title: 'Practice', body: 'Word, spelling, reading and story activities built from the child’s own error patterns, with progress over time.' },
+  { icon: <BookOpen className="h-5 w-5" />, title: 'Reading', body: 'The child reads letters, words and short sentences aloud. You mark each one, the way a teacher normally would.' },
+  { icon: <PenLine className="h-5 w-5" />, title: 'Writing', body: 'A short dictation. Lexora compares every letter and spots patterns like swapped b and d, or missing letters.' },
+  { icon: <Ear className="h-5 w-5" />, title: 'Speaking', body: 'A short passage read into the microphone. Lexora listens on your own computer and notes how smoothly it went.' },
+  { icon: <Sparkles className="h-5 w-5" />, title: 'Practice', body: 'Word, spelling, reading and story activities built from that child’s own mistakes — with progress over time.' },
 ]
 
 export default function Landing() {
@@ -30,12 +30,12 @@ export default function Landing() {
             Notice reading patterns early. <span className="text-teal-700">Practise what matters.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-navy-500">
-            Lexora helps teachers and parents observe how a child reads, writes and speaks English, explains what it
-            noticed, and turns that into personalised practice. Built for Indian classrooms, on real Indian children’s reading data.
+            Ten minutes with a child tells you how they read, write and speak English. Lexora explains what it
+            noticed in plain words, and turns it into practice made for that child. Built for Indian classrooms.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/login" className="btn-primary btn-lg">Try the demo <ArrowRight className="h-4 w-4" /></Link>
-            <Link to="/how-it-works" className="btn-secondary btn-lg">See the method</Link>
+            <Link to="/how-it-works" className="btn-secondary btn-lg">How it works</Link>
           </div>
         </div>
         <div className="card relative overflow-hidden p-6">
@@ -53,14 +53,14 @@ export default function Landing() {
                 </li>
               ))}
             </ul>
-            <p className="mt-5 text-xs text-navy-500">Every contribution is exact and explainable. No probability of a diagnosis is shown, because none is claimed.</p>
+            <p className="mt-5 text-xs text-navy-500">You see exactly what led to the summary, with the real numbers. No score claims to diagnose anything.</p>
           </div>
         </div>
       </section>
 
       <section className="bg-cream-50 py-16">
         <div className="mx-auto max-w-6xl px-5">
-          <h2 className="text-2xl font-bold md:text-3xl">One coherent flow, four observations</h2>
+          <h2 className="text-2xl font-bold md:text-3xl">Ten minutes, three short activities</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-4">
             {STEPS.map((s) => (
               <div key={s.title} className="card p-5">
@@ -78,7 +78,7 @@ export default function Landing() {
           <div>
             <div className="inline-flex rounded-xl bg-teal-100 p-2.5 text-teal-700"><ShieldCheck className="h-5 w-5" /></div>
             <h2 className="mt-3 text-2xl font-bold">Honest by design</h2>
-            <p className="mt-2 text-navy-500">Each component is validated on real datasets — ASER reading sessions, real children’s misspellings, and a published dyslexia dataset for the modelling method. None of that makes Lexora a diagnostic instrument, and the interface never pretends otherwise.</p>
+            <p className="mt-2 text-navy-500">Lexora only reports what it actually observed in the session, and shows you the numbers behind every line. It never claims to diagnose anything, and it never pretends to be more certain than it is.</p>
           </div>
           <Disclaimer />
         </div>

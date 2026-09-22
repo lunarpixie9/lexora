@@ -41,7 +41,7 @@ interface MissRes { real_errors: number; detection_rate: number; pattern_coverag
 
 const LEVEL = { CL: 'Capital letters', SL: 'Small letters', W: 'Words', S: 'Sentences' } as const
 
-export default function Methodology() {
+export default function Evidence() {
   const { user } = useAuth()
   const [v, setV] = useState<Validation | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -50,7 +50,9 @@ export default function Methodology() {
   const body = (
     <div className="space-y-6">
       <div className="card p-6">
-        <h2 className="text-xl font-bold">Component validation ≠ clinical validation</h2>
+        <p className="text-sm text-navy-500">Written for reviewers and examiners. If you are a teacher or parent,{' '}
+          <Link to="/how-it-works" className="font-bold text-teal-700 underline">the plain-language guide</Link> is what you want.</p>
+        <h2 className="mt-3 text-xl font-bold">Component validation ≠ clinical validation</h2>
         <p className="mt-2 text-sm text-navy-700">Each part of Lexora is checked against a real dataset that fits that part. Passing these checks shows the pipeline behaves sensibly on real data. It does <strong>not</strong> show that Lexora can identify dyslexia — no approved dataset provides dyslexia labels for Indian children’s English, and Lexora does not claim to.</p>
         <ol className="mt-4 grid gap-3 text-sm md:grid-cols-4">
           {[
@@ -165,14 +167,14 @@ export default function Methodology() {
   )
 
   if (user) {
-    return <div><div className="mb-6"><p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-700">Methodology</p><h1 className="text-3xl font-bold">How Lexora works — and what it does not claim</h1></div>{body}</div>
+    return <div><div className="mb-6"><p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-700">Evidence</p><h1 className="text-3xl font-bold">Datasets, models and validation</h1></div>{body}</div>
   }
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5"><Logo /><Link to="/login" className="btn-primary">Sign in</Link></header>
       <main className="mx-auto max-w-5xl px-5 pb-16">
         <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm font-bold text-navy-700"><ArrowLeft className="h-4 w-4" />Home</Link>
-        <div className="mb-6 flex items-center gap-3"><FlaskConical className="h-8 w-8 text-teal-700" /><h1 className="text-3xl font-bold">How Lexora works — and what it does not claim</h1></div>
+        <div className="mb-6 flex items-center gap-3"><FlaskConical className="h-8 w-8 text-teal-700" /><h1 className="text-3xl font-bold">Datasets, models and validation</h1></div>
         {body}
       </main>
     </div>

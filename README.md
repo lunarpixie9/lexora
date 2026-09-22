@@ -86,7 +86,7 @@ scripts/          dataset acquisition/inspection and component-validation script
 | XGBoost + SHAP method check (separate experiment) | **Rello et al. 2020** (Kaggle, CC BY 4.0) | Spanish gamified test with diagnosed labels — not a Lexora dataset |
 
 Validation results are served at `GET /api/validation` and shown on the
-**How it works** page. They validate components; they do not establish
+**Evidence** page (linked from the plain-language *How it works* guide). They validate components; they do not establish
 clinical validity.
 
 ## Tests and checks

@@ -1,4 +1,4 @@
-import { BookOpen, ClipboardList, FlaskConical, Home, LogOut, Menu, Sparkles, TrendingUp, Users, X } from 'lucide-react'
+import { BookOpen, ClipboardList, HelpCircle, Home, LogOut, Menu, Sparkles, TrendingUp, Users, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { homeFor, useAuth } from '../lib/auth'
@@ -10,11 +10,11 @@ const NAV: Record<Role, { to: string; label: string; icon: ReactNode }[]> = {
     { to: '/teacher/dashboard', label: 'Dashboard', icon: <Home className="h-4 w-4" /> },
     { to: '/teacher/children', label: 'Children', icon: <Users className="h-4 w-4" /> },
     { to: '/teacher/screening/new', label: 'New screening', icon: <ClipboardList className="h-4 w-4" /> },
-    { to: '/methodology', label: 'How it works', icon: <FlaskConical className="h-4 w-4" /> },
+    { to: '/how-it-works', label: 'How it works', icon: <HelpCircle className="h-4 w-4" /> },
   ],
   parent: [
     { to: '/parent/dashboard', label: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-    { to: '/methodology', label: 'How it works', icon: <FlaskConical className="h-4 w-4" /> },
+    { to: '/how-it-works', label: 'How it works', icon: <HelpCircle className="h-4 w-4" /> },
   ],
   child: [
     { to: '/child/home', label: 'Home', icon: <Home className="h-5 w-5" /> },
