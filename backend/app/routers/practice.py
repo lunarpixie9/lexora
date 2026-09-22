@@ -62,9 +62,9 @@ def generate(data: GenerateIn, user: User = Depends(require_roles("teacher", "pa
         profile = session.risk_score.explanation["error_profile"]
     existing = db.scalar(select(PracticeActivity).where(PracticeActivity.child_id == child.id))
     seed = child.id * 1000 + (session.id if session else 0) + (1 if existing else 0) * 17
-    acts, source = generate_activities({"age": child.age, "class_grade": child.class_grade}, profile, seed)
+    generated = generate_activities({"age": child.age, "class_grade": child.class_grade}, profile, seed)
     created = []
-    for a in acts:
+    for a, source in generated:
         row = PracticeActivity(child_id=child.id, session_id=session.id if session else None, kind=a.kind,
                                title=a.title, target_skills=a.target_skills, content=a.model_dump(), source=source)
         db.add(row)

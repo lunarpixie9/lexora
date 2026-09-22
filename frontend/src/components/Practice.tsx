@@ -25,8 +25,12 @@ export function PracticeList({ childId, canGenerate, openHref, sessionId }: { ch
   const [items, setItems] = useState<Activity[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // With a Gemini key the story and sentences are written by the model, which takes
+  // up to a minute on the free tier - say so instead of showing a silent spinner.
+  const [aiEnabled, setAiEnabled] = useState(false)
   const load = () => api.practice(childId).then(setItems).catch((e) => setError(e.message))
   useEffect(() => { load() /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [childId])
+  useEffect(() => { if (canGenerate) api.health().then((h) => setAiEnabled(h.practice_generator.startsWith('gemini'))).catch(() => null) }, [canGenerate])
 
   const generate = async () => {
     setBusy(true); setError(null)
@@ -42,8 +46,11 @@ export function PracticeList({ childId, canGenerate, openHref, sessionId }: { ch
     <div className="space-y-4">
       {canGenerate && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-cream-300 p-4">
-          <p className="text-sm text-navy-500">{items.length ? 'Generate a fresh set from the latest screening’s error profile.' : 'No practice yet. Generate a set from the latest screening (or starter practice if none).'}</p>
-          <button className="btn-teal" onClick={generate} disabled={busy}>{busy ? <><Loader2 className="h-4 w-4 animate-spin" />Generating…</> : <><Sparkles className="h-4 w-4" />Generate practice</>}</button>
+          <div className="text-sm text-navy-500">
+            <p>{items.length ? 'Generate a fresh set from the latest screening’s error profile.' : 'No practice yet. Generate a set from the latest screening (or starter practice if none).'}</p>
+            {aiEnabled && <p className="mt-1 text-xs">The story and read-aloud sentences are written by Gemini for this child — this can take up to a minute. Word and spelling drills are always built locally.</p>}
+          </div>
+          <button className="btn-teal" onClick={generate} disabled={busy}>{busy ? <><Loader2 className="h-4 w-4 animate-spin" />{aiEnabled ? 'Writing a story…' : 'Generating…'}</> : <><Sparkles className="h-4 w-4" />Generate practice</>}</button>
         </div>
       )}
       {items.length === 0 ? (

@@ -22,7 +22,8 @@ Teacher/parent login → child profile → screening
                    + a phoneme recogniser that flags mispronounced words Whisper would "repair")
 → ASER-trained reading-level model (XGBoost + SHAP)
 → additive screening indicator with exact per-signal contributions
-→ explainable report → personalised practice (word / spelling / reading / story)
+→ explainable report → personalised practice (word / spelling / reading / story;
+                        story + sentences via Gemini when a key is set, local generator otherwise)
 → child completes practice → progress over time
 ```
 
@@ -68,7 +69,7 @@ backend/
   lexora_nlp/     deterministic text analysis (alignment, error patterns, phonetics)
   lexora_speech/  ffmpeg conversion, faster-whisper transcription, fluency features
   lexora_ml/      ASER reading-level model, composite indicator, Rello validation
-  tests/          pytest suite (26 tests, no models needed)
+  tests/          pytest suite (29 tests, no models or API keys needed)
 frontend/         React + TypeScript + Vite + Tailwind
 data/             datasets (raw/processed are gitignored), metadata & validation JSON
 docs/             PROJECT_SPEC.md (governing spec), DATASET_RESEARCH.md, ARCHITECTURE.md, SETUP.md

@@ -24,6 +24,9 @@ dist/
 ~/.kaggle/
 kaggle.json
 
+# Local archives (e.g. the frontend zipped up to hand to a designer)
+/*.zip
+
 # OS / editor
 desktop.ini
 Thumbs.db

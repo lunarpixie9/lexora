@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     preload_models: bool = True
 
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-3.6-flash"
 
     seed_demo: bool = True
     demo_password: str = "lexora123"

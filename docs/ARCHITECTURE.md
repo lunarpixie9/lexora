@@ -100,7 +100,11 @@ Bands: `< 0.25` few signals · `< 0.50` some signals (may warrant closer observa
 
 ## 6. Practice generation (`services/practice.py`)
 
-`generate_activities()` returns four validated `ActivityContent` objects (word choice, spelling dictation, read-aloud sentences, story + questions) built from the error profile: missed words, phonics word families, orientation pairs (bad/dad, was/saw), distractors shaped by the child's own patterns. `GeminiGenerator` is used only when `GEMINI_API_KEY` is set (free tier, REST via httpx, JSON schema, banned clinical terms, Pydantic validation) and falls back to `DeterministicGenerator` on any failure. Every activity records `source`. `score_attempt()` scores answers (spelling via `analyze_text`, so feedback names the pattern).
+`generate_activities()` returns four validated activities, each paired with the generator that produced it (the UI badges them individually).
+
+* **Always deterministic**: word-choice and spelling drills. They depend on the child's exact error patterns (mirror pairs bad/dad, phonics families, orientation distractors) and must have provably correct answers — an LLM is worse at this, not better.
+* **Gemini when a key is configured**: the story (+2 comprehension questions) and the six read-aloud sentences, which benefit from variety. Free tier, REST via httpx with a structured `responseSchema`, thinking disabled (`thinkingBudget: 0` - current flash models otherwise spend the output budget on reasoning and return truncated JSON), 2,000-token cap, 45 s timeout, three attempts with backoff because `503 high demand` is common. Measured: 15-45 s per generation.
+* **Validation before anything is stored**: banned clinical vocabulary, story length, ≤8 words per sentence, ≤8 letters per word, every question's answer present in its own options, and the child's target words actually used. Any failure logs a warning and keeps the deterministic story/sentences, so the product never depends on the API. `score_attempt()` scores answers (spelling via `analyze_text`, so feedback names the pattern).
 
 ## 7. Frontend
 
@@ -116,8 +120,8 @@ PBKDF2-SHA256 password hashes, HS256 JWTs (startup warning if the built-in dev k
 |---|---|
 | Whisper model | demo transcriber, `engine=demo`, session `mode=demo`, badge in UI |
 | Model artifact | rule-based ladder level, `engine` says so |
-| Gemini key | deterministic generator (default) |
-| Database config | SQLite file created automatically |
+| Gemini key | deterministic story and sentences (drills are deterministic either way) |
+| MySQL | SQLite file created automatically (one env var switches back) |
 | Microphone / child | teacher's **Fill with demo answers** |
 
 ## 10. Deviations from PROJECT_SPEC.md (deliberate, documented)
