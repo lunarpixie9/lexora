@@ -8,7 +8,8 @@ import Login from './pages/Login'
 
 // Pages are code-split so the landing/login shell loads fast; Recharts and the
 // report/progress views only download when a signed-in user opens them.
-const Methodology = lazy(() => import('./pages/Methodology'))
+const HowItWorks = lazy(() => import('./pages/HowItWorks'))
+const Evidence = lazy(() => import('./pages/Evidence'))
 const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'))
 const Children = lazy(() => import('./pages/teacher/Children'))
 const ChildDetail = lazy(() => import('./pages/teacher/ChildDetail'))
@@ -34,7 +35,8 @@ export default function App() {
           {/* Public */}
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<Navigate to="/how-it-works" replace />} />
-          <Route path="/how-it-works" element={<Methodology />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/how-it-works/evidence" element={<Evidence />} />
           <Route path="/login" element={<Login />} />
 
           {/* Teacher */}
@@ -79,7 +81,9 @@ export default function App() {
           {/* Shared, authenticated */}
           <Route element={<RequireRole roles={['teacher', 'parent', 'child']} />}>
             <Route element={<AppShell />}>
-              <Route path="/methodology" element={<Methodology />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/evidence" element={<Evidence />} />
+              <Route path="/methodology" element={<Navigate to="/how-it-works" replace />} />
             </Route>
           </Route>
 
