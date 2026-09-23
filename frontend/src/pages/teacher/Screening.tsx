@@ -28,18 +28,18 @@ export function NewScreening() {
         <ul className="grid gap-3 md:grid-cols-2">
           {children.map((c) => (
             <li key={c.id} className="card flex items-center gap-4 p-4">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-lavender-100 font-display text-xl font-bold text-lavender-600">{c.first_name[0]}</div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-cream-200 font-display text-xl font-bold text-terra-500">{c.first_name[0]}</div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2"><p className="font-bold">{c.first_name}</p>{c.is_demo && <DemoBadge small />}</div>
-                <p className="text-xs text-navy-500">Age {c.age} · Class {c.class_grade} · <BandBadge band={c.latest_band} /></p>
+                <p className="text-xs text-ink-600">Age {c.age} · Class {c.class_grade} · <BandBadge band={c.latest_band} /></p>
               </div>
               <button className="btn-primary" disabled={busy !== null} onClick={() => start(c.id)}>{busy === c.id ? 'Starting…' : 'Start'}</button>
             </li>
           ))}
         </ul>
       )}
-      <div className="card mt-6 p-5 text-sm text-navy-500">
-        <p className="font-bold text-navy-900">How the reading ladder is scored</p>
+      <div className="card mt-6 p-5 text-sm text-ink-600">
+        <p className="font-bold text-ink-900">How the reading ladder is scored</p>
         <p className="mt-1">You mark each item as the ASER examiner would. A level is passed with 4 of 5 items; once a level is failed the higher levels are skipped, exactly as in ASER. You can also record the child — local Whisper gives an advisory judgement, but your mark always wins (on real ASER clips Whisper agrees with examiners 67–80% of the time, least for single letters).</p>
       </div>
     </div>

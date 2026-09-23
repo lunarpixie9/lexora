@@ -1,6 +1,7 @@
-import { ClipboardList, Plus, Users, X } from 'lucide-react'
+import { ClipboardList, Plus, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ART, Sparkle } from '../../components/decor'
 import { BandBadge, DemoBadge, EmptyState, ErrorBox, PageHeader, Spinner, Stat } from '../../components/ui'
 import { api } from '../../lib/api'
 import { useAuth } from '../../lib/auth'
@@ -27,38 +28,43 @@ export default function TeacherDashboard() {
         actions={<><Link to="/teacher/children?new=1" className="btn-secondary"><Plus className="h-4 w-4" />Add child</Link><Link to="/teacher/screening/new" className="btn-primary"><ClipboardList className="h-4 w-4" />New screening</Link></>} />
 
       {isDemoTeacher && showTour && children.length > 0 && (
-        <div className="card relative mb-6 border-sun-300 bg-sun-100/50 p-5">
-          <button className="btn-ghost absolute right-2 top-2 p-1" aria-label="Dismiss walkthrough" onClick={() => { setShowTour(false); try { localStorage.setItem('lexora.tour', 'done') } catch { /* ignore */ } }}><X className="h-4 w-4" /></button>
-          <p className="text-xs font-bold uppercase tracking-wider text-sun-700">Demo walkthrough</p>
-          <ol className="mt-2 grid gap-3 text-sm md:grid-cols-3">
-            <li className="rounded-xl bg-white p-3"><span className="font-bold">1 · See a finished result.</span> Open <Link className="text-teal-700 underline" to={`/teacher/children/${children[0].id}`}>{children[0].first_name}</Link> — two generated screenings, a report, practice and a progress trend.</li>
-            <li className="rounded-xl bg-white p-3"><span className="font-bold">2 · Run one live.</span> <Link className="text-teal-700 underline" to="/teacher/screening/new">Start a screening</Link> for {children[1]?.first_name ?? 'a child'}: mark a few reading items, then “Fill with demo answers” → “Finish and analyse”.</li>
-            <li className="rounded-xl bg-white p-3"><span className="font-bold">3 · Switch roles.</span> Sign out and use the <strong>child</strong> demo login to complete a practice activity, or the <strong>parent</strong> login to see the family view.</li>
+        <div className="panel-dashed relative mb-6 rounded-[20px] p-6">
+          <button className="absolute right-4 top-3.5 text-sm font-bold text-ink-500 hover:text-ink-900" aria-label="Dismiss walkthrough" onClick={() => { setShowTour(false); try { localStorage.setItem('lexora.tour', 'done') } catch { /* ignore */ } }}>✕</button>
+          <p className="eyebrow mb-4">Demo walkthrough</p>
+          <ol className="grid gap-3.5 text-[13px] font-medium leading-[1.6] text-ink-600 md:grid-cols-3">
+            <li className="rounded-[14px] bg-cream-200 p-4"><span className="font-bold text-ink-900">1 · See a finished result.</span> Open <Link className="text-teal-700 underline" to={`/teacher/children/${children[0].id}`}>{children[0].first_name}</Link> — two generated screenings, a report, practice and a progress trend.</li>
+            <li className="rounded-[14px] bg-cream-200 p-4"><span className="font-bold text-ink-900">2 · Run one live.</span> <Link className="text-teal-700 underline" to="/teacher/screening/new">Start a screening</Link> for {children[1]?.first_name ?? 'a child'}: mark a few reading items, then “Fill with demo answers” → “Finish and analyse”.</li>
+            <li className="rounded-[14px] bg-cream-200 p-4"><span className="font-bold text-ink-900">3 · Switch roles.</span> Sign out and use the <strong>child</strong> demo login to complete a practice activity, or the <strong>parent</strong> login to see the family view.</li>
           </ol>
-          <p className="mt-2 text-xs text-navy-500">Everything for the demo children is generated demo content and labelled as such.</p>
+          <p className="mt-3.5 text-xs font-medium text-ink-500">Everything for the demo children is generated demo content and labelled as such.</p>
         </div>
       )}
+      <div className="relative mb-6 grid h-[158px] place-items-center overflow-hidden rounded-3xl bg-mint-100 shadow-[0_0_0_7px_#fff,0_10px_28px_rgb(74_65_57_/_0.13)]" aria-hidden>
+        <Sparkle className="left-6 top-5" size={18} />
+        <Sparkle className="bottom-5 right-7" size={14} delay={1.4} />
+        <img src={ART.classroom} alt="" className="absolute inset-0 h-full w-full rounded-[inherit] object-cover" />
+      </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Children" value={children.length} hint={`${screened.length} screened`} />
         <Stat label="May warrant observation" value={attention.length} hint="some or multiple signals in latest screening" />
         <Stat label="Speech engine" value={health ? (health.whisper.state === 'unavailable' ? 'Demo fallback' : 'Whisper (local)') : '…'} hint={health ? `${health.whisper.state}${health.whisper.model ? ` · ${health.whisper.model}` : ''}` : undefined} />
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-lg font-bold">Your children</h2>
-        <Link to="/teacher/children" className="text-sm font-bold text-teal-700">View all</Link>
+      <div className="mt-10 flex items-center justify-between">
+        <h2 className="font-display text-[22px] font-bold text-ink-900">Your children</h2>
+        <Link to="/teacher/children" className="text-xs font-bold uppercase tracking-[0.12em] text-terra-500 hover:text-terra-600">View all</Link>
       </div>
       {children.length === 0 ? (
         <div className="mt-3"><EmptyState icon={<Users className="h-6 w-6" />} title="No children yet" body="Add a child profile to start a screening." action={<Link to="/teacher/children?new=1" className="btn-primary">Add a child</Link>} /></div>
       ) : (
-        <ul className="mt-3 grid gap-3 md:grid-cols-2">
+        <ul className="mt-4 grid gap-4 md:grid-cols-2">
           {children.slice(0, 6).map((c) => (
             <li key={c.id}>
-              <Link to={`/teacher/children/${c.id}`} className="card flex items-center gap-4 p-4 transition hover:-translate-y-0.5 hover:shadow-lg">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-lavender-100 font-display text-xl font-bold text-lavender-600">{c.first_name[0]}</div>
+              <Link to={`/teacher/children/${c.id}`} className="card flex items-center gap-4 p-[18px] transition hover:-translate-y-0.5 hover:shadow-lift">
+                <span className="avatar-hatch grid h-[50px] w-[50px] shrink-0 place-items-center rounded-full font-display text-[19px] font-bold text-terra-500">{c.first_name[0]}</span>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2"><p className="truncate font-bold">{c.first_name}</p>{c.is_demo && <DemoBadge small />}</div>
-                  <p className="text-xs text-navy-500">Age {c.age} · Class {c.class_grade} · {c.sessions_completed} screening{c.sessions_completed === 1 ? '' : 's'}</p>
+                  <div className="flex items-center gap-2"><p className="truncate text-base font-bold text-ink-900">{c.first_name}</p>{c.is_demo && <DemoBadge small />}</div>
+                  <p className="mt-0.5 text-xs font-medium text-ink-500">Age {c.age} · Class {c.class_grade} · {c.sessions_completed} screening{c.sessions_completed === 1 ? '' : 's'}</p>
                 </div>
                 <BandBadge band={c.latest_band} />
               </Link>

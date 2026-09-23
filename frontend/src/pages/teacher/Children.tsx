@@ -22,7 +22,7 @@ export default function Children() {
         actions={<button className="btn-primary" onClick={() => { setShowForm(!showForm); setParams({}) }}>{showForm ? <><X className="h-4 w-4" />Close</> : <><Plus className="h-4 w-4" />Add child</>}</button>} />
 
       {created && (
-        <div className="card mb-6 border-teal-300 bg-teal-100/40 p-5">
+        <div className="card mb-6 bg-teal-100 p-6">
           <div className="flex items-start gap-3">
             <KeyRound className="mt-0.5 h-5 w-5 text-teal-700" />
             <div className="text-sm">
@@ -41,18 +41,22 @@ export default function Children() {
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-cream-50 text-left text-xs uppercase tracking-wider text-navy-500">
+            <thead className="bg-cream-200 text-left text-[11px] font-bold uppercase tracking-[0.14em] text-ink-500">
               <tr><th className="px-4 py-3">Child</th><th className="px-4 py-3">Age / class</th><th className="px-4 py-3">Language</th><th className="px-4 py-3">Screenings</th><th className="px-4 py-3">Latest indicator</th><th className="px-4 py-3">Login</th></tr>
             </thead>
             <tbody>
               {children.map((c) => (
-                <tr key={c.id} className="border-t border-cream-200 hover:bg-cream-50">
-                  <td className="px-4 py-3"><Link to={`/teacher/children/${c.id}`} className="font-bold text-navy-900 hover:text-teal-700">{c.first_name}</Link>{c.is_demo && <span className="ml-2"><DemoBadge small /></span>}</td>
+                <tr key={c.id} className="border-t border-cream-300 hover:bg-cream-100">
+                  <td className="px-4 py-3.5">
+                    <Link to={`/teacher/children/${c.id}`} className="inline-flex items-center gap-3 font-bold text-ink-900 hover:text-terra-500">
+                      <span className="avatar-hatch grid h-11 w-11 shrink-0 place-items-center rounded-full font-display text-[17px] font-bold text-terra-500">{c.first_name[0]}</span>
+                      {c.first_name}
+                    </Link>{c.is_demo && <span className="ml-2"><DemoBadge small /></span>}</td>
                   <td className="px-4 py-3">{c.age} · class {c.class_grade}</td>
                   <td className="px-4 py-3">{c.home_language}</td>
                   <td className="px-4 py-3">{c.sessions_completed}</td>
                   <td className="px-4 py-3"><BandBadge band={c.latest_band} /></td>
-                  <td className="px-4 py-3 text-xs text-navy-500">{c.child_login_email ?? '—'}</td>
+                  <td className="px-4 py-3 text-xs text-ink-600">{c.child_login_email ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -81,7 +85,7 @@ export function ChildForm({ onDone, initial, childId }: { onDone: (res: { child:
   }
 
   return (
-    <form onSubmit={submit} className="card mb-6 grid gap-4 p-5 md:grid-cols-2">
+    <form onSubmit={submit} className="panel-dashed mb-6 grid gap-4 rounded-[20px] p-6 md:grid-cols-2">
       <div><label className="label" htmlFor="fn">First name</label><input id="fn" className="input" required value={form.first_name} onChange={(e) => upd('first_name', e.target.value)} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="label" htmlFor="age">Age</label><input id="age" className="input" type="number" min={4} max={16} required value={form.age} onChange={(e) => upd('age', e.target.value)} /></div>

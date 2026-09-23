@@ -1,92 +1,175 @@
 @import "tailwindcss";
 
-/* Lexora design tokens: warm cream, deep navy, muted lavender, soft teal, warm yellow. */
+/*
+ * Lexora design language.
+ *
+ * Warm paper ground, terracotta display type, a sky band for heroes and
+ * child-facing tops, sand for section grounds, teal for actions and slate for
+ * the footer. Display type is Poppins (uppercase for hero lines, with one
+ * italic accent word); body copy is Quicksand in warm grey rather than black;
+ * figures and technical notes are IBM Plex Mono.
+ */
 @theme {
-  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-cream-50: #fdfbf7;
-  --color-cream-100: #faf6ee;
-  --color-cream-200: #f1eadc;
-  --color-cream-300: #e4dac6;
+  /* Paper / cream */
+  --color-cream-50: #fffdfa;
+  --color-cream-100: #fdf9f2;
+  --color-cream-200: #f7f0e4;
+  --color-cream-300: #f1e8d8;
+  --color-cream-400: #e3d6be;
+  --color-cream-500: #dccdb4;
 
-  --color-navy-500: #34415f;
-  --color-navy-700: #263352;
-  --color-navy-900: #1f2a44;
+  /* Sand: section grounds and bands */
+  --color-sand-100: #f6eedf;
+  --color-sand-300: #eadcc4;
+  --color-sand-500: #c9b89a;
 
-  --color-lavender-100: #efeaf8;
-  --color-lavender-200: #ddd3f0;
-  --color-lavender-400: #b8a9d9;
-  --color-lavender-600: #8e7cc3;
+  /* Ink: warm greys, never black */
+  --color-ink-400: #b0a69b;
+  --color-ink-500: #a0958a;
+  --color-ink-600: #8c8279;
+  --color-ink-700: #6f655a;
+  --color-ink-900: #4a4139;
 
-  --color-teal-100: #e3f3f3;
-  --color-teal-300: #a8dad9;
-  --color-teal-500: #4fa3a5;
-  --color-teal-700: #357c7e;
+  /* Terracotta: display type, primary action, eyebrows */
+  --color-terra-100: #f5e0d6;
+  --color-terra-500: #a8531c;
+  --color-terra-600: #8f4414;
+  --color-terra-700: #8f6a3f;
 
-  --color-sun-100: #fdf3d6;
-  --color-sun-300: #f8dd8a;
-  --color-sun-500: #f2c14e;
-  --color-sun-700: #c9961d;
+  /* Sky: heroes, CTAs, child-facing tops */
+  --color-sky-100: #e3f0f3;
+  --color-sky-300: #b4dce8;
+  --color-sky-500: #a2cfdf;
 
-  --color-coral-100: #fbe6e0;
-  --color-coral-500: #e07a5f;
+  /* Teal: secondary actions, "good" signals */
+  --color-teal-100: #e9f3f5;
+  --color-teal-500: #4e9bad;
+  --color-teal-700: #2f7b8a;
 
-  --shadow-card: 0 1px 2px rgb(31 42 68 / 0.04), 0 8px 24px -12px rgb(31 42 68 / 0.18);
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
+  /* Sun: demo / caution */
+  --color-sun-100: #f6e9d4;
+  --color-sun-500: #e8b54e;
+  --color-sun-700: #8f6a3f;
+
+  /* Coral: recording, errors, "multiple signals" */
+  --color-coral-100: #f5e0d6;
+  --color-coral-500: #c0563a;
+  --color-coral-700: #a8471f;
+
+  /* Slate: footer */
+  --color-slate-500: #8a9199;
+  --color-slate-700: #4a5058;
+  --color-slate-900: #343a42;
+
+  /* Mint: the ground every illustration sits on */
+  --color-mint-100: #eaf2ec;
+
+  --shadow-card: 0 4px 20px rgb(74 65 57 / 0.07);
+  --shadow-lift: 0 10px 28px rgb(74 65 57 / 0.13);
+  --shadow-pill: 0 8px 22px rgb(120 60 20 / 0.24);
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 22px;
 }
 
-:root {
-  color-scheme: light;
-}
+/* Element defaults live in @layer base so any utility class still wins. */
+@layer base {
+  :root { color-scheme: light; }
 
-html, body, #root {
-  min-height: 100%;
-}
+  html, body, #root { min-height: 100%; }
 
-body {
-  @apply bg-cream-100 text-navy-900 font-sans antialiased;
-}
+  body {
+    @apply bg-cream-100 text-ink-700 font-sans antialiased;
+  }
 
-h1, h2, h3 {
-  @apply font-display tracking-tight;
-}
+  h1, h2, h3 {
+    @apply font-display text-ink-900;
+    letter-spacing: -0.01em;
+  }
 
-/* focus ring that works on cream backgrounds */
-:focus-visible {
-  outline: 3px solid var(--color-teal-300);
-  outline-offset: 2px;
-  border-radius: 6px;
+  ::selection { background: var(--color-sky-300); }
+
+  /* Focus ring that reads on both cream and sky grounds. */
+  :focus-visible {
+    outline: 3px solid var(--color-teal-500);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
 }
 
 @layer components {
-  .card {
-    @apply bg-white rounded-2xl shadow-card border border-cream-200;
-  }
+  .card { @apply bg-white rounded-2xl shadow-card; }
+  .card-lg { @apply bg-white rounded-3xl shadow-card; }
 
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed; }
-  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-navy-900 text-white hover:bg-navy-700; }
-  .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-lavender-100 text-navy-900 hover:bg-lavender-200; }
-  .btn-teal { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-teal-500 text-white hover:bg-teal-700; }
-  .btn-sun { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed bg-sun-500 text-navy-900 hover:bg-sun-300; }
-  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed text-navy-700 hover:bg-cream-200; }
-  .btn-lg { @apply px-6 py-3.5 text-base rounded-2xl; }
+  /* Dashed panel: tasks, disclaimers, demo tools. */
+  .panel-dashed { @apply rounded-2xl border border-dashed border-cream-500 bg-white; }
+
+  /* Pill buttons, uppercase and tracked out. */
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed bg-terra-500 text-white hover:bg-terra-600; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed bg-white text-terra-500 border border-cream-400 hover:bg-cream-100; }
+  .btn-outline { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-terra-500 border-2 border-terra-500 hover:bg-terra-500 hover:text-white; }
+  .btn-teal { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed bg-teal-500 text-white hover:bg-teal-700; }
+  .btn-sun { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed bg-sun-500 text-[#4a3a1c] hover:brightness-95; }
+  .btn-quiet { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed bg-cream-200 text-ink-700 hover:bg-cream-300; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] transition disabled:opacity-50 disabled:cursor-not-allowed text-terra-500 hover:bg-cream-200; }
+  .btn-sm { @apply px-4 py-2.5 text-[11px]; }
+  .btn-lg { @apply px-9 py-4 text-sm tracking-[0.13em]; }
 
   .input {
-    @apply w-full rounded-xl border border-cream-300 bg-white px-3.5 py-2.5 text-navy-900 placeholder:text-navy-500/50
-      focus:border-teal-500 focus:ring-2 focus:ring-teal-300;
+    @apply w-full rounded-xl border border-cream-400 bg-white px-4 py-3.5 text-[15px] font-semibold text-ink-900
+      placeholder:font-medium placeholder:text-ink-400 focus:border-teal-500;
   }
 
-  .label { @apply block text-sm font-bold text-navy-700 mb-1.5; }
+  .label { @apply mb-2 block text-xs font-bold uppercase tracking-[0.1em] text-ink-600; }
 
-  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold; }
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold leading-tight; }
+
+  /* Small uppercase kicker above a heading. */
+  .eyebrow { @apply text-[11px] font-bold uppercase tracking-[0.18em] text-terra-500; }
+  .mono { @apply font-mono text-[11px] font-medium text-ink-500; }
+
+  /* Dashed chip used for the screening-aid note and playful section marks. */
+  .chip {
+    @apply inline-block whitespace-nowrap rounded-md border border-dashed border-sand-500 bg-white px-5 py-2.5
+      text-[11px] font-semibold leading-snug tracking-[0.09em] text-terra-700;
+  }
+  .chip-on-sky { @apply border-white/85 bg-cream-100/70; }
+
+  /* Circular illustration medallion: white ring, sand ring, paper ring. */
+  .medallion {
+    @apply relative grid place-items-center overflow-hidden rounded-full bg-mint-100;
+    box-shadow: 0 0 0 7px #fff, 0 0 0 9px var(--color-sand-300), 0 0 0 17px var(--color-cream-100),
+      0 12px 30px rgb(74 65 57 / 0.14);
+  }
+  .medallion-sm {
+    @apply relative grid place-items-center overflow-hidden rounded-full bg-mint-100;
+    box-shadow: 0 0 0 6px #fff, 0 0 0 8px var(--color-sand-300), 0 10px 26px rgb(74 65 57 / 0.13);
+  }
+  .medallion img, .medallion-sm img { @apply absolute inset-0 h-full w-full object-cover; }
+
+  /* Full-bleed grounds. */
+  .band-sky { background: linear-gradient(180deg, #b4dce8 0%, #a2cfdf 100%); }
+  .band-sand { background: #eadcc4 repeating-linear-gradient(45deg, rgb(255 255 255 / 0.2) 0 2px, transparent 2px 15px); }
+  .paper-dots { background: #fdf9f2 radial-gradient(#f1e7d6 1.4px, transparent 1.5px) 0 0 / 26px 26px; }
+
+  /* Initial avatar with a hand-drawn hatch. */
+  .avatar-hatch { background: repeating-linear-gradient(135deg, #f6eedf 0 7px, #eee2cc 7px 14px); }
 }
 
-@keyframes pulse-ring {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+@keyframes twinkle { 0%, 100% { opacity: .3; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes pulse-ring { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+
+.animate-rise { animation: rise .6s ease both; }
+.animate-float { animation: float 7s ease-in-out infinite; }
+.animate-twinkle { animation: twinkle 3s ease-in-out infinite; }
+
 .recording-ring::after {
   content: "";
   position: absolute; inset: 0; border-radius: 9999px;
@@ -94,9 +177,13 @@ h1, h2, h3 {
   animation: pulse-ring 1.2s ease-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise, .animate-float, .animate-twinkle, .recording-ring::after { animation: none; }
+}
+
 @media print {
-  aside, header, nav, .no-print { display: none !important; }
+  aside, header, nav, footer, .no-print { display: none !important; }
   main { padding: 0 !important; max-width: none !important; }
-  .card { box-shadow: none; border-color: #ddd; break-inside: avoid; }
+  .card, .card-lg { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
   body { background: #fff; }
 }

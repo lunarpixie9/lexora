@@ -56,7 +56,7 @@ export function useRecorder() {
 }
 
 export function RecorderControl({ rec, big = false, label = 'Record' }: { rec: ReturnType<typeof useRecorder>; big?: boolean; label?: string }) {
-  if (!rec.supported) return <p className="text-sm text-navy-500">Recording is not supported in this browser.</p>
+  if (!rec.supported) return <p className="text-sm text-ink-600">Recording is not supported in this browser.</p>
   const size = big ? 'h-20 w-20' : 'h-12 w-12'
   return (
     <div className="flex flex-col items-center gap-3">
@@ -72,7 +72,7 @@ export function RecorderControl({ rec, big = false, label = 'Record' }: { rec: R
           <button type="button" onClick={rec.reset} className="btn-ghost p-2" aria-label="Discard recording"><Trash2 className="h-4 w-4" /></button>
         </div>
       )}
-      <p className="text-xs font-semibold text-navy-500">
+      <p className="text-xs font-semibold text-ink-600">
         {rec.recording ? `Recording… ${rec.elapsed.toFixed(0)} s — tap to stop` : rec.result ? `${rec.result.duration.toFixed(1)} s recorded` : `Tap to ${label.toLowerCase()}`}
       </p>
       {rec.error && <p className="text-xs font-semibold text-coral-500" role="alert">{rec.error}</p>}

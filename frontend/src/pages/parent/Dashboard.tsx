@@ -1,6 +1,7 @@
 import { Heart, TrendingUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ART } from '../../components/decor'
 import ProgressView from '../../components/ProgressView'
 import { BandBadge, DemoBadge, Disclaimer, EmptyState, ErrorBox, PageHeader, Spinner } from '../../components/ui'
 import { api } from '../../lib/api'
@@ -18,21 +19,32 @@ export function ParentDashboard() {
   if (!children) return <Spinner />
   return (
     <div>
-      <PageHeader eyebrow="Parent" title={`Welcome, ${user?.full_name.split(' ')[0]}`} subtitle="Follow your child's screening observations, progress and practice." />
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-6">
+        <div>
+          <p className="eyebrow mb-1.5">Parent</p>
+          <h1 className="font-display text-[26px] font-bold leading-tight text-ink-900 md:text-[34px]">Welcome, {user?.full_name.split(' ')[0]}</h1>
+          <p className="mt-2 max-w-[580px] text-[15px] font-medium leading-relaxed text-ink-600">
+            Follow your child's screening observations, progress and practice.
+          </p>
+        </div>
+        <div className="medallion-sm hidden h-32 w-32 shrink-0 sm:grid" aria-hidden>
+          <img src={ART.family} alt="" />
+        </div>
+      </div>
       {children.length === 0 ? (
         <EmptyState icon={<Heart className="h-6 w-6" />} title="No child linked yet" body="Ask your child's teacher to link this email address to their profile." />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {children.map((c) => (
             <li key={c.id}>
-              <Link to={`/parent/child/${c.id}`} className="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-sun-100 font-display text-2xl font-bold text-sun-700">{c.first_name[0]}</div>
+              <Link to={`/parent/child/${c.id}`} className="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:shadow-lift">
+                <span className="avatar-hatch grid h-14 w-14 shrink-0 place-items-center rounded-full font-display text-2xl font-bold text-terra-500">{c.first_name[0]}</span>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2"><p className="text-lg font-bold">{c.first_name}</p>{c.is_demo && <DemoBadge small />}</div>
-                  <p className="text-sm text-navy-500">Age {c.age} · Class {c.class_grade} · {c.sessions_completed} screening{c.sessions_completed === 1 ? '' : 's'}</p>
+                  <div className="flex items-center gap-2"><p className="text-lg font-bold text-ink-900">{c.first_name}</p>{c.is_demo && <DemoBadge small />}</div>
+                  <p className="text-sm font-medium text-ink-500">Age {c.age} · Class {c.class_grade} · {c.sessions_completed} screening{c.sessions_completed === 1 ? '' : 's'}</p>
                   <div className="mt-2"><BandBadge band={c.latest_band} /></div>
                 </div>
-                <TrendingUp className="h-5 w-5 text-navy-500" />
+                <TrendingUp className="h-5 w-5 shrink-0 text-terra-500" />
               </Link>
             </li>
           ))}

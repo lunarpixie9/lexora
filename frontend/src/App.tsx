@@ -78,13 +78,11 @@ export default function App() {
             </Route>
           </Route>
 
-          {/* Shared, authenticated */}
+              {/* Shared. HowItWorks and Evidence render their own frame: the public
+              shell when signed out, the app shell when signed in. */}
           <Route element={<RequireRole roles={['teacher', 'parent', 'child']} />}>
-            <Route element={<AppShell />}>
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/evidence" element={<Evidence />} />
-              <Route path="/methodology" element={<Navigate to="/how-it-works" replace />} />
-            </Route>
+            <Route path="/evidence" element={<Evidence />} />
+            <Route path="/methodology" element={<Navigate to="/how-it-works" replace />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
