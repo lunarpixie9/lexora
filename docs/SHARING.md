@@ -1,8 +1,9 @@
 # Letting someone else try Lexora
 
-Lexora runs on your machine. The speech models (Whisper + the phoneme layer) need
-about 2.6 GB of RAM and a few seconds of CPU per recording, so there is no free
-hosting tier that will run the backend — sharing means letting someone reach the
+Lexora runs on your machine. With Whisper and the phoneme layer loaded the
+backend sits at roughly 0.9 GB of RAM (measured: 873 MB idle after both models
+load) and rises while it analyses a recording, which takes a few seconds of CPU.
+No free hosting tier will run that, so sharing means letting someone reach the
 copy running on your laptop, while your laptop is on.
 
 Both routes below serve the **dev server**, which is fine for a demo. Nothing here
@@ -99,10 +100,10 @@ problem:
 
 | Requirement | Free tier reality |
 |---|---|
-| ~2.6 GB RAM resident for the speech models | Most free tiers cap at 512 MB |
+| ~0.9 GB RAM resident for the speech models, more under load | Most free tiers cap at 512 MB |
 | Several CPU-seconds per recording | Free tiers throttle or sleep |
 | MySQL | Available, but only the smallest instances |
 
-A paid small VM (roughly 4 GB RAM) would run it as-is: same two commands, plus a
+A paid small VM (2 GB RAM is enough) would run it as-is: same two commands, plus a
 reverse proxy and a real `SECRET_KEY`. That is out of scope for the project
 submission, which is why the demo is run locally.
