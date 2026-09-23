@@ -59,7 +59,8 @@ microphone.
 
 Full setup, environment variables, MySQL, Gemini and troubleshooting:
 [docs/SETUP.md](docs/SETUP.md). Design and data flow:
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Letting someone else try it, over
+Wi-Fi or a temporary public link: [docs/SHARING.md](docs/SHARING.md).
 
 ## Repository layout
 
@@ -72,7 +73,7 @@ backend/
   tests/          pytest suite (29 tests, no models or API keys needed)
 frontend/         React + TypeScript + Vite + Tailwind
 data/             datasets (raw/processed are gitignored), metadata & validation JSON
-docs/             PROJECT_SPEC.md (governing spec), DATASET_RESEARCH.md, ARCHITECTURE.md, SETUP.md
+docs/             PROJECT_SPEC.md (governing spec), DATASET_RESEARCH.md, ARCHITECTURE.md, SETUP.md, SHARING.md
 scripts/          dataset acquisition/inspection and component-validation scripts
 ```
 
