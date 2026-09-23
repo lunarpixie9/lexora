@@ -12,12 +12,12 @@ export const BAND_SHORT: Record<string, string> = {
   insufficient_data: 'Incomplete',
 }
 
-// Bands are shown in calm, non-alarming colours: teal, sun, coral.
+// Bands are shown in calm, non-alarming colours: sky, sun, terracotta.
 export const BAND_CLASS: Record<string, string> = {
-  few_signals: 'bg-teal-100 text-teal-700',
+  few_signals: 'bg-sky-100 text-teal-700',
   some_signals: 'bg-sun-100 text-sun-700',
-  multiple_signals: 'bg-coral-100 text-coral-500',
-  insufficient_data: 'bg-cream-200 text-navy-700',
+  multiple_signals: 'bg-coral-100 text-coral-700',
+  insufficient_data: 'bg-cream-300 text-ink-700',
 }
 
 export const LEVEL_LABEL: Record<string, string> = {

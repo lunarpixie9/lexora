@@ -1,7 +1,8 @@
-import { ArrowLeft, BookOpen, Check, Ear, FlaskConical, Mic, PenLine, Sparkles, TrendingUp, X } from 'lucide-react'
+import { BookOpen, Check, Ear, FlaskConical, Mic, PenLine, Sparkles, TrendingUp, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Logo } from '../components/Layout'
+import { Wave } from '../components/decor'
+import { AppShell, PublicShell } from '../components/Layout'
 import { Disclaimer, Section } from '../components/ui'
 import { useAuth } from '../lib/auth'
 
@@ -48,12 +49,12 @@ export default function HowItWorks() {
     <div className="space-y-6">
       <div className="card p-6 md:p-8">
         <h2 className="text-xl font-bold md:text-2xl">What Lexora is for</h2>
-        <p className="mt-3 max-w-3xl text-navy-700">
+        <p className="mt-3 max-w-3xl text-ink-700">
           Some children find reading and writing harder than their classmates, and it can take years for anyone to
           notice. Lexora gives a teacher or parent a short, structured way to look — about ten minutes with the child —
           and then explains, in plain words, what it noticed and what to practise next.
         </p>
-        <p className="mt-3 max-w-3xl text-navy-700">
+        <p className="mt-3 max-w-3xl text-ink-700">
           It is a <strong>second pair of eyes</strong>, not a test result and not a medical opinion. Everything it
           reports is something you could have seen yourself if you had time to watch closely and write it all down.
         </p>
@@ -67,46 +68,46 @@ export default function HowItWorks() {
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-teal-700">{s.icon}</span>
                 <div>
                   <p className="font-bold">{i + 1}. {s.title}</p>
-                  <p className="text-xs text-navy-500">{s.time}</p>
+                  <p className="text-xs text-ink-600">{s.time}</p>
                 </div>
               </div>
-              <p className="mt-3 text-sm text-navy-700">{s.body}</p>
+              <p className="mt-3 text-sm text-ink-700">{s.body}</p>
             </li>
           ))}
         </ol>
-        <p className="mt-4 text-sm text-navy-500">
+        <p className="mt-4 text-sm text-ink-600">
           The letters, words and sentences are the real ones used in a large reading survey of Indian schoolchildren,
           so what the child is asked to read is familiar and age-appropriate.
         </p>
       </Section>
 
       <Section title="What you get at the end">
-        <p className="text-sm text-navy-700">
+        <p className="text-sm text-ink-700">
           A one-page report you can print or share with parents. It has three parts:
         </p>
         <ul className="mt-3 space-y-3 text-sm">
           <li className="rounded-xl bg-cream-100 p-3">
             <p className="font-bold">A summary line</p>
-            <p className="text-navy-700">How many things stood out in this session, written as a sentence — for example
+            <p className="text-ink-700">How many things stood out in this session, written as a sentence — for example
               “Some literacy signals observed — may warrant closer observation”.</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {BANDS.map((b) => (
                 <div key={b.label} className="rounded-xl bg-white p-3">
                   <span className={`badge ${b.cls}`}>{b.label}</span>
-                  <p className="mt-2 text-xs text-navy-700">{b.body}</p>
+                  <p className="mt-2 text-xs text-ink-700">{b.body}</p>
                 </div>
               ))}
             </div>
           </li>
           <li className="rounded-xl bg-cream-100 p-3">
             <p className="font-bold">Why it said that</p>
-            <p className="text-navy-700">Every observation that contributed, with the actual numbers behind it — how
+            <p className="text-ink-700">Every observation that contributed, with the actual numbers behind it — how
               many words were read correctly, which letters were swapped, how fast the passage was read. Nothing is
               hidden, and you can disagree: correct any mark and the summary updates.</p>
           </li>
           <li className="rounded-xl bg-cream-100 p-3">
             <p className="font-bold">What to practise</p>
-            <p className="text-navy-700">Four short activities built from that child's own mistakes — the words they
+            <p className="text-ink-700">Four short activities built from that child's own mistakes — the words they
               missed, the letters they confused. The child can do them on their own login.</p>
           </li>
         </ul>
@@ -116,7 +117,7 @@ export default function HowItWorks() {
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <p className="flex items-center gap-2 font-bold"><BookOpen className="h-4 w-4 text-teal-700" />If you are a teacher</p>
-            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-navy-700">
+            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-ink-700">
               <li>Add the child (name, age, class). You get a login and PIN for them.</li>
               <li>Start a screening and sit with the child for about ten minutes.</li>
               <li>Open the report. Correct anything you disagree with.</li>
@@ -125,8 +126,8 @@ export default function HowItWorks() {
             </ol>
           </div>
           <div>
-            <p className="flex items-center gap-2 font-bold"><TrendingUp className="h-4 w-4 text-lavender-600" />If you are a parent</p>
-            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-navy-700">
+            <p className="flex items-center gap-2 font-bold"><TrendingUp className="h-4 w-4 text-terra-500" />If you are a parent</p>
+            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-ink-700">
               <li>Ask the teacher to link your email to your child.</li>
               <li>Open your child to see the report and progress over time.</li>
               <li>Sit with them for a practice activity now and then — ten minutes is plenty.</li>
@@ -134,7 +135,7 @@ export default function HowItWorks() {
           </div>
           <div>
             <p className="flex items-center gap-2 font-bold"><Sparkles className="h-4 w-4 text-sun-700" />If you are a child</p>
-            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-navy-700">
+            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-ink-700">
               <li>Sign in with the email and PIN your teacher gave you.</li>
               <li>Tap <strong>Practice</strong> and pick an activity.</li>
               <li>Read out loud when you see the microphone — it will tell you how you did.</li>
@@ -145,7 +146,7 @@ export default function HowItWorks() {
       </Section>
 
       <Section title="Getting a good session" aside={<Mic className="h-5 w-5 text-teal-700" />}>
-        <ul className="grid gap-2 text-sm text-navy-700 md:grid-cols-2">
+        <ul className="grid gap-2 text-sm text-ink-700 md:grid-cols-2">
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" />A quiet room, and the microphone close to the child — this matters more than anything else for accurate listening.</li>
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" />Tell the child it is not a test and there are no marks. Nervous children read worse than they can.</li>
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" />Let them finish an item before you mark it, and do not correct them mid-word.</li>
@@ -156,7 +157,7 @@ export default function HowItWorks() {
       </Section>
 
       <Section title="What Lexora does not do" aside={<X className="h-5 w-5 text-coral-500" />}>
-        <ul className="space-y-2 text-sm text-navy-700">
+        <ul className="space-y-2 text-sm text-ink-700">
           <li className="flex gap-2"><X className="mt-0.5 h-4 w-4 shrink-0 text-coral-500" /><span><strong>It does not diagnose dyslexia</strong>, or anything else. Only a qualified professional can assess a child. Lexora reports what it observed in one short session.</span></li>
           <li className="flex gap-2"><X className="mt-0.5 h-4 w-4 shrink-0 text-coral-500" /><span><strong>It does not replace your judgement.</strong> You know the child; if the report disagrees with what you see, trust yourself and correct it.</span></li>
           <li className="flex gap-2"><X className="mt-0.5 h-4 w-4 shrink-0 text-coral-500" /><span><strong>It does not rank or compare children.</strong> Results belong to one child and the adults linked to them.</span></li>
@@ -169,7 +170,7 @@ export default function HowItWorks() {
           {FAQ.map(([q, a]) => (
             <div key={q}>
               <dt className="text-sm font-bold">{q}</dt>
-              <dd className="mt-1 text-sm text-navy-700">{a}</dd>
+              <dd className="mt-1 text-sm text-ink-700">{a}</dd>
             </div>
           ))}
         </dl>
@@ -179,10 +180,10 @@ export default function HowItWorks() {
 
       <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
         <div className="flex items-start gap-3">
-          <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-navy-500" />
+          <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-ink-600" />
           <div>
             <p className="font-bold">Reviewing this project?</p>
-            <p className="text-sm text-navy-500">The datasets, models and validation results are set out separately.</p>
+            <p className="text-sm text-ink-600">The datasets, models and validation results are set out separately.</p>
           </div>
         </div>
         <Link to={user ? '/evidence' : '/how-it-works/evidence'} className="btn-secondary">See the evidence</Link>
@@ -192,25 +193,31 @@ export default function HowItWorks() {
 
   if (user) {
     return (
-      <div>
-        <div className="mb-6">
-          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-700">Guide</p>
-          <h1 className="text-3xl font-bold">How Lexora works</h1>
-          <p className="mt-1 text-navy-500">A ten-minute look at how a child reads, writes and speaks — and what to do next.</p>
+      <AppShell>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Guide</p>
+          <h1 className="font-display text-[26px] font-bold leading-tight text-ink-900 md:text-[34px]">How Lexora works</h1>
+          <p className="mt-2 max-w-[560px] text-[15px] font-medium leading-relaxed text-ink-600">
+            A ten-minute look at how a child reads, writes and speaks — and what to do next.
+          </p>
         </div>
         {body}
-      </div>
+      </AppShell>
     )
   }
   return (
-    <div className="min-h-screen">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5"><Logo /><Link to="/login" className="btn-primary">Sign in</Link></header>
-      <main className="mx-auto max-w-5xl px-5 pb-16">
-        <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm font-bold text-navy-700"><ArrowLeft className="h-4 w-4" />Home</Link>
-        <h1 className="mb-2 text-3xl font-bold">How Lexora works</h1>
-        <p className="mb-6 max-w-2xl text-navy-500">A ten-minute look at how a child reads, writes and speaks — and what to do next.</p>
-        {body}
-      </main>
-    </div>
+    <PublicShell>
+      <section className="band-sky relative px-5 pb-20 pt-12 text-center md:px-7">
+        <span className="chip chip-on-sky">✦ screening aid, not a diagnosis ✦</span>
+        <h1 className="mt-6 font-display text-[32px] font-extrabold uppercase leading-[1.02] tracking-[-0.02em] text-terra-500 md:text-[48px]">
+          How Lexora<br /><span className="font-bold italic normal-case">works</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-[600px] text-base font-semibold leading-relaxed text-slate-900 md:text-[18px]">
+          A ten-minute look at how a child reads, writes and speaks — and what to do next.
+        </p>
+        <Wave fill="#FDF9F2" />
+      </section>
+      <div className="mx-auto max-w-5xl px-5 pb-20 pt-10 md:px-7">{body}</div>
+    </PublicShell>
   )
 }

@@ -4,10 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import { api, ApiError } from '../lib/api'
 import { LADDER_LABEL } from '../lib/format'
 import type { ScreeningSession, Task } from '../lib/types'
+import { ART, Sparkle } from './decor'
 import { RecorderControl, SpeakButton, useRecorder } from './Recorder'
-import { Disclaimer, ErrorBox, ListeningStatus, ProgressBar, Spinner } from './ui'
+import { Disclaimer, ErrorBox, ListeningStatus, Spinner } from './ui'
 
 type Mode = 'teacher' | 'child'
+
+const KIND_ART: Record<Task['kind'], string> = { reading: ART.reading, writing: ART.writing, speech: ART.readAloud }
 
 const KIND_INTRO: Record<Task['kind'], { title: string; child: string; teacher: string }> = {
   reading: { title: 'Reading', child: 'Read what you see out loud, then tap the microphone to stop.', teacher: 'Ask the child to read the item aloud, then mark it — exactly as in the ASER assessment.' },
@@ -90,10 +93,10 @@ export default function ScreeningRunner({ sessionId, mode }: { sessionId: number
 
   if (finished) {
     return (
-      <div className="card mx-auto max-w-xl p-8 text-center">
+      <div className="card-lg mx-auto max-w-xl p-10 text-center">
         <CheckCircle2 className="mx-auto h-14 w-14 text-teal-500" aria-hidden />
-        <h2 className="mt-4 text-2xl font-bold">All done, {session.child_name}!</h2>
-        <p className="mt-2 text-navy-500">Great effort. Your teacher can see how it went. Ready for some practice?</p>
+        <h2 className="mt-4 font-display text-[26px] font-bold text-ink-900">All done, {session.child_name}!</h2>
+        <p className="mt-2 font-medium text-ink-600">Great effort. Your teacher can see how it went. Ready for some practice?</p>
         <div className="mt-6 flex justify-center gap-3">
           <button className="btn-teal btn-lg" onClick={() => nav('/child/practice')}><Sparkles className="h-4 w-4" />Go to practice</button>
           <button className="btn-secondary btn-lg" onClick={() => nav('/child/home')}>Home</button>
@@ -104,8 +107,8 @@ export default function ScreeningRunner({ sessionId, mode }: { sessionId: number
 
   if (session.status === 'completed') {
     return (
-      <div className="card p-8 text-center">
-        <h2 className="text-xl font-bold">This screening is complete</h2>
+      <div className="card-lg p-10 text-center">
+        <h2 className="font-display text-[22px] font-bold text-ink-900">This screening is complete</h2>
         {mode === 'teacher' && <button className="btn-primary mt-4" onClick={() => nav(`/teacher/reports/${session.id}`)}>Open report</button>}
       </div>
     )
@@ -117,15 +120,17 @@ export default function ScreeningRunner({ sessionId, mode }: { sessionId: number
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-5 flex items-center justify-between text-sm font-bold text-navy-500">
-        <span>{session.child_name} {session.mode === 'demo' && <span className="badge ml-1 bg-sun-100 text-sun-700">demo answers</span>}</span>
-        <span aria-live="polite">{done} / {total}{inFlight > 0 && <span className="ml-2 font-semibold text-teal-700"><Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" aria-hidden />listening to {inFlight}</span>}</span>
+      <div className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-[0.1em] text-ink-500">
+        <span>{session.child_name} · task {Math.min(done + 1, total)} of {total} {session.mode === 'demo' && <span className="badge ml-1 bg-sun-100 text-sun-700">demo answers</span>}</span>
+        <span aria-live="polite" className="text-terra-500">{done} / {total}{inFlight > 0 && <span className="ml-2 text-teal-700"><Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" aria-hidden />listening to {inFlight}</span>}</span>
       </div>
-      <ProgressBar value={done / total} className="mb-6" />
+      <div className="mb-7 h-1.5 rounded-full bg-cream-300" aria-hidden>
+        <div className="h-1.5 rounded-full bg-terra-500 transition-[width] duration-300" style={{ width: `${(done / total) * 100}%` }} />
+      </div>
 
       {error && <div className="mb-4"><ErrorBox message={error} /></div>}
       {failed.length > 0 && (
-        <div className="card mb-4 flex flex-wrap items-center justify-between gap-3 border-coral-500/30 bg-coral-100/50 p-4 text-sm" role="alert">
+        <div className="card mb-4 flex flex-wrap items-center justify-between gap-3 bg-coral-100 p-5 text-sm" role="alert">
           <p><strong>{failed.length} recording{failed.length > 1 ? 's' : ''} could not be analysed.</strong> {failed[0].error}</p>
           <div className="flex gap-2">
             <button className="btn-secondary" onClick={() => setPending((q) => q.map((p) => ({ ...p, error: undefined })))}><RefreshCw className="h-4 w-4" />Retry</button>
@@ -147,10 +152,10 @@ export default function ScreeningRunner({ sessionId, mode }: { sessionId: number
           onMark={(correct, mistakes, dur) => run('Saving…', () => api.markItem(session.id, current.id, { correct, mistakes, duration_seconds: dur }))}
         />
       ) : (
-        <div className="card p-8 text-center">
+        <div className="card-lg p-10 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-teal-500" aria-hidden />
-          <h2 className="mt-3 text-xl font-bold">{canFinish ? 'Every task is answered' : 'Nearly there…'}</h2>
-          <p className="mt-1 text-navy-500">
+          <h2 className="mt-3 font-display text-[22px] font-bold text-ink-900">{canFinish ? 'Every task is answered' : 'Nearly there…'}</h2>
+          <p className="mx-auto mt-2 max-w-lg font-medium leading-relaxed text-ink-600">
             {!canFinish && `Still listening to ${inFlight} recording${inFlight > 1 ? 's' : ''}. `}
             {session.progress.skipped > 0 && `${session.progress.skipped} reading items were skipped because the ladder stopped early, as in ASER. `}
             {canFinish && (mode === 'teacher' ? 'Analyse the session to produce the screening indicator.' : 'Tap finish to see how you did.')}
@@ -162,8 +167,8 @@ export default function ScreeningRunner({ sessionId, mode }: { sessionId: number
       )}
 
       {mode === 'teacher' && (
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-cream-300 p-4 text-sm">
-          <p className="text-navy-500">Presenting without a child or microphone? Fill the remaining tasks with clearly-labelled demo answers.</p>
+        <div className="panel-dashed mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[20px] p-5 text-sm">
+          <p className="max-w-[520px] font-medium leading-relaxed text-ink-600">Presenting without a child or microphone? Fill the remaining tasks with clearly-labelled demo answers.</p>
           <div className="flex gap-2">
             <button className="btn-sun" disabled={!!busy || !current} onClick={() => run('Filling demo answers…', () => api.demoFill(session.id))}>Fill with demo answers</button>
             {done > 0 && current && <button className="btn-secondary" disabled={!!busy || !canFinish} onClick={finish}>Finish early</button>}
@@ -202,16 +207,23 @@ function TaskCard({ task, mode, busy, session, onText, onAudio, onMark }: {
   const promptClass = isLetter ? 'text-8xl md:text-9xl' : task.item_level === 'W' ? 'text-6xl md:text-7xl' : task.kind === 'speech' ? 'text-2xl md:text-3xl leading-relaxed' : 'text-3xl md:text-4xl'
 
   return (
-    <div className="card overflow-hidden">
-      <div className="flex items-center justify-between border-b border-cream-200 bg-cream-50 px-5 py-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-teal-700">{intro.title} · {levelLabel}</p>
-          <p className="text-sm text-navy-500">{mode === 'child' ? intro.child : intro.teacher}</p>
-        </div>
-        <span className="badge bg-lavender-100 text-lavender-600">{idxInKind} of {totalInKind}</span>
+    <div className="panel-dashed grid overflow-hidden rounded-[22px] md:grid-cols-2">
+      {/* Illustration panel */}
+      <div className="relative hidden place-items-center bg-[linear-gradient(180deg,#CFE7EF,#F4EEDF)] p-9 md:grid" aria-hidden>
+        <Sparkle className="left-6 top-6" size={18} />
+        <Sparkle className="bottom-7 right-7" size={14} delay={1.4} />
+        <img src={KIND_ART[task.kind]} alt=""
+          className="animate-float block aspect-square w-[78%] max-w-[300px] rounded-full object-cover shadow-[0_0_0_8px_#fff,0_0_0_10px_#EADCC4,0_14px_34px_rgb(74_65_57_/_0.16)]" />
       </div>
 
-      <div className="px-5 py-8 md:px-8">
+      <div className="flex flex-col justify-center px-5 py-8 md:px-9">
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <p className="eyebrow">{intro.title} · {levelLabel}</p>
+            <p className="mt-1.5 text-sm font-medium leading-relaxed text-ink-600">{mode === 'child' ? intro.child : intro.teacher}</p>
+          </div>
+          <span className="badge shrink-0 bg-cream-200 text-terra-500">{idxInKind} of {totalInKind}</span>
+        </div>
         {task.kind === 'writing' ? (
           <div className="text-center">
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -220,7 +232,7 @@ function TaskCard({ task, mode, busy, session, onText, onAudio, onMark }: {
                 <button type="button" className="btn-ghost" onClick={() => setReveal(!reveal)}>{reveal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}{reveal ? 'Hide from child' : 'Show to examiner'}</button>
               )}
             </div>
-            {reveal && mode === 'teacher' && <p className="mt-4 rounded-xl bg-cream-100 px-4 py-2 font-display text-2xl">{task.prompt_text}</p>}
+            {reveal && mode === 'teacher' && <p className="mt-4 rounded-xl bg-cream-200 px-4 py-2.5 font-display text-2xl font-bold text-ink-900">{task.prompt_text}</p>}
             <form className="mx-auto mt-6 max-w-md" onSubmit={(e) => { e.preventDefault(); if (text.trim()) onText(text.trim()) }}>
               <label className="label text-left" htmlFor="answer">Type what you heard</label>
               <input id="answer" className="input text-center font-display text-2xl" autoFocus autoComplete="off" autoCapitalize="off" spellCheck={false}
@@ -230,26 +242,26 @@ function TaskCard({ task, mode, busy, session, onText, onAudio, onMark }: {
           </div>
         ) : (
           <>
-            <p className={`text-center font-display font-bold text-navy-900 ${promptClass}`} lang="en">{task.prompt_text}</p>
-            <p className="mt-2 text-center text-xs text-navy-500">Item from the {task.prompt_source} assessment</p>
+            <p className={`text-center font-display font-bold text-ink-900 ${promptClass}`} lang="en">{task.prompt_text}</p>
+            <p className="mono mt-3.5 text-center text-ink-400">Item from the {task.prompt_source} assessment</p>
 
             {task.kind === 'reading' && mode === 'teacher' ? (
               <div className="mt-8">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <button className="btn-teal btn-lg" disabled={!!busy} onClick={() => onMark(true, 0, elapsed())}><Check className="h-5 w-5" />Read correctly</button>
-                  <button className="btn-secondary btn-lg" disabled={!!busy} onClick={() => onMark(false, isLetter ? 1 : mistakes, elapsed())}><X className="h-5 w-5" />Not correct</button>
+                  <button className="btn-teal" disabled={!!busy} onClick={() => onMark(true, 0, elapsed())}><Check className="h-4 w-4" />Read correctly</button>
+                  <button className="btn-secondary" disabled={!!busy} onClick={() => onMark(false, isLetter ? 1 : mistakes, elapsed())}><X className="h-4 w-4" />Not correct</button>
                 </div>
                 {!isLetter && (
-                  <fieldset className="mt-3 flex items-center justify-center gap-2 text-sm text-navy-500">
+                  <fieldset className="mt-3.5 flex flex-wrap items-center justify-center gap-2 text-[13px] font-medium text-ink-500">
                     <legend className="sr-only">Number of mistakes if not correct</legend>
                     <span>If not correct, mistakes:</span>
                     {[1, 2, 3, 4].map((n) => (
                       <button type="button" key={n} onClick={() => setMistakes(n)} aria-pressed={mistakes === n}
-                        className={`h-8 w-8 rounded-lg text-sm font-bold ${mistakes === n ? 'bg-navy-900 text-white' : 'bg-cream-100 hover:bg-cream-200'}`}>{n === 4 ? '4+' : n}</button>
+                        className={`h-[34px] w-[34px] rounded-[10px] text-[13px] font-bold ${mistakes === n ? 'bg-slate-900 text-white' : 'bg-cream-200 text-ink-700 hover:bg-cream-300'}`}>{n === 4 ? '4+' : n}</button>
                     ))}
                   </fieldset>
                 )}
-                <details className="mt-4 text-sm text-navy-500">
+                <details className="mt-4 text-sm text-ink-600">
                   <summary className="cursor-pointer font-bold">Optionally record the child (Whisper judges too)</summary>
                   <div className="mt-3 flex flex-col items-center gap-3">
                     <RecorderControl rec={rec} />
@@ -268,7 +280,7 @@ function TaskCard({ task, mode, busy, session, onText, onAudio, onMark }: {
                       <button className="btn-primary btn-lg" onClick={() => onAudio(rec.result!.blob, rec.result!.filename, rec.result!.duration)}>Send recording</button>
                     )}
                     {mode === 'teacher' && task.kind === 'speech' && (
-                      <p className="max-w-md text-center text-xs text-navy-500">If Whisper is unavailable on this machine the server falls back to a clearly-labelled demo transcriber.</p>
+                      <p className="max-w-md text-center text-xs text-ink-600">If Whisper is unavailable on this machine the server falls back to a clearly-labelled demo transcriber.</p>
                     )}
                   </>
                 )}

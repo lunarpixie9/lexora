@@ -34,17 +34,17 @@ export default function ProgressView({ childId, childMode = false }: { childId: 
       {data.screenings.length > 0 && (
         <Section title={childMode ? 'My screenings' : 'Screening indicator over time'}>
           {data.screenings.length > 1 ? <ScoreTrend screenings={data.screenings} /> : (
-            <p className="text-sm text-navy-500">One screening so far ({fmtDate(data.screenings[0].date)}, indicator {Math.round(data.screenings[0].score * 100)}/100). A second screening will show a trend.</p>
+            <p className="text-sm text-ink-600">One screening so far ({fmtDate(data.screenings[0].date)}, indicator {Math.round(data.screenings[0].score * 100)}/100). A second screening will show a trend.</p>
           )}
           {!childMode && (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wider text-navy-500"><tr><th className="py-1 pr-3">Date</th><th className="pr-3">Indicator</th><th className="pr-3">Reading level</th><th className="pr-3">Reading acc.</th><th className="pr-3">Spelling acc.</th><th>Rate</th></tr></thead>
+                <thead className="text-left text-[11px] font-bold uppercase tracking-[0.14em] text-ink-500"><tr><th className="py-1 pr-3">Date</th><th className="pr-3">Indicator</th><th className="pr-3">Reading level</th><th className="pr-3">Reading acc.</th><th className="pr-3">Spelling acc.</th><th>Rate</th></tr></thead>
                 <tbody>
                   {data.screenings.map((s) => (
-                    <tr key={s.session_id} className="border-t border-cream-200">
+                    <tr key={s.session_id} className="border-t border-cream-300 font-medium">
                       <td className="py-2 pr-3">{fmtDate(s.date)}{s.mode === 'demo' && <span className="ml-1 text-xs text-sun-700">demo</span>}</td>
-                      <td className="pr-3"><BandBadge band={s.band} /> <span className="text-navy-500">{Math.round(s.score * 100)}</span></td>
+                      <td className="pr-3"><BandBadge band={s.band} /> <span className="text-ink-600">{Math.round(s.score * 100)}</span></td>
                       <td className="pr-3">{LEVEL_LABEL[s.reading_level] ?? s.reading_level}</td>
                       <td className="pr-3">{pct(s.reading_accuracy)}</td>
                       <td className="pr-3">{pct(s.spelling_accuracy)}</td>
@@ -68,10 +68,10 @@ export default function ProgressView({ childId, childMode = false }: { childId: 
         <Section title={childMode ? 'Skills I am building' : 'Skills practised'}>
           <ul className="grid gap-3 sm:grid-cols-2">
             {skills.map(([k, s]) => (
-              <li key={k} className="rounded-xl bg-cream-100 p-3">
-                <div className="flex justify-between text-sm"><span className="font-bold">{s.label}</span><span className="text-navy-500">{s.attempts} {s.attempts === 1 ? 'attempt' : 'attempts'}</span></div>
-                <ProgressBar value={s.latest} className="mt-2" color="bg-lavender-600" />
-                <p className="mt-1 text-xs text-navy-500">latest {pct(s.latest)} · average {pct(s.average)}{s.trend !== 0 && ` · ${s.trend > 0 ? '▲' : '▼'} ${Math.abs(Math.round(s.trend * 100))} pts since first`}</p>
+              <li key={k} className="rounded-[14px] bg-cream-200 p-4">
+                <div className="flex justify-between text-sm"><span className="font-bold text-ink-900">{s.label}</span><span className="font-medium text-ink-500">{s.attempts} {s.attempts === 1 ? 'attempt' : 'attempts'}</span></div>
+                <ProgressBar value={s.latest} className="mt-2" color="bg-terra-500" />
+                <p className="mt-1.5 text-xs font-medium text-ink-500">latest {pct(s.latest)} · average {pct(s.average)}{s.trend !== 0 && ` · ${s.trend > 0 ? '▲' : '▼'} ${Math.abs(Math.round(s.trend * 100))} pts since first`}</p>
               </li>
             ))}
           </ul>
