@@ -31,9 +31,7 @@ const NAV: Record<Role, { to: string; label: string; match?: string }[]> = {
 export function Logo({ light = false }: { light?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-3">
-      <span className="grid h-[42px] w-[42px] place-items-center rounded-full bg-slate-900 font-display text-[15px] font-semibold italic text-[#F0E4CE]" aria-hidden>
-        L
-      </span>
+      <img src="/logo-mark.png" alt="" aria-hidden width={46} height={46} className="h-[46px] w-[46px] rounded-full bg-white" />
       <span className={`font-display text-xl font-bold tracking-[-0.01em] ${light ? 'text-white' : 'text-ink-900'}`}>Lexora</span>
     </Link>
   )
